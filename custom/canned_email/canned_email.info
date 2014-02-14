@@ -1,0 +1,12 @@
+name = Canned Email
+description = Creates email templates for administrators to send particular emails to users.
+package = ASB
+core = 7.x
+configure = admin/config/canned_email
+
+;; dependencies[] = entity
+dependencies[] = views
+
+files[] = canned_email.admin.inc
+files[] = canned_email.controller.inc
+

@@ -1,0 +1,74 @@
+<?php
+
+/**
+ * @file
+ * Install, update, and uninstall functions for canned_email module.
+ */
+
+/**
+ * Implements hook_scheme().
+ */
+function canned_email_schema() {
+  $schema['canned_email'] = array(
+    'description' => 'Canned email storage',
+    'fields' => array(
+      'ceid' => array(
+        'description' => 'Primary key for canned email entities',
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'language' => array(
+        'description' => 'The language of the canned email.',
+        'type' => 'varchar',
+        'length' => 32,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'name' => array(
+        'description' => 'Administrative name of the entity',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'email_subject' => array(
+        'description' => 'The subject of the canned email',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+      ),
+      'email_body' => array(
+        'description' => 'The body of the canned email message',
+        'type' => 'text',
+        'size' => 'big',
+      ),
+      'created' => array(
+        'description' => 'The Unix timestamp when the canned entity was created.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'changed' => array(
+        'description' => 'The Unix timestamp when the canned entity was most recently saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('ceid'),
+  );
+  return $schema;
+}
+
+
+/**
+ * Implements hook_uninstall().
+ */
+function canned_email_uninstall() {
+  variable_del('canned_email_bcc_default_email');
+  variable_del('canned_email_bcc_on_form');
+  variable_del('canned_email_ccbcc');
+  variable_del('canned_email_cc_default_email');
+  variable_del('canned_email_cc_on_form');
+  variable_del('canned_email_content_types');
+}
