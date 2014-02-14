@@ -291,6 +291,6 @@ function canned_email_insert_ajax_callback(&$form, &$form_state) {
  */
 function canned_email_get_author() {
   $node = node_load(arg(1));
-  $user = user_load($node->nid);
+  $user = user_load($node->uid);
   return $user->mail;
 }
