@@ -1,0 +1,13 @@
+--- conditional_fields.module
++++ conditional_fields.module
+@@ -592,8 +592,8 @@
+     if (!empty($behaviors)) {
+       foreach ($behaviors as $behavior) {
+         // Custom behaviors are callbacks.
+-        if (function_exists($$behavior)) {
+-          $$behavior('edit', $form, $form_state, $dependent, $dependencies);
++        if (function_exists($behavior)) {
++          $behavior('edit', $form, $form_state, $dependent, $dependencies);
+         }
+       }
+     }
