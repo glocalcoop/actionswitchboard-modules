@@ -26,6 +26,8 @@ function canned_email_form($form, &$form_state) {
     '#weight' => -1,
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#prefix' => '<div id="available-canned-emails-wrapper">',
+    '#suffix' => '</div>',
   );
   $form['available_canned_emails']['canned_email_choices'] = array(
     '#type' => 'select',
@@ -269,13 +271,15 @@ function canned_email_sort_ajax_callback(&$form, &$form_state) {
  * Insert current canned email text into real email body
  */
 function canned_email_insert_ajax_callback(&$form, &$form_state) {
+  $form['available_canned_emails']['#collapsed'] = TRUE;
   $form['email_subject']['#value'] = $form['available_canned_emails']['mailer_set']['canned_email_subjects']['#value'];
   $form['email_body']['#value'] = $form['available_canned_emails']['mailer_set']['canned_email_bodies']['#value'];
   $commands = array(
   '#type' => 'ajax',
     '#commands' => array(
       ajax_command_replace("#email-subject-ajax-wrapper", render($form['email_subject'])),
-      ajax_command_replace("#email-body-ajax-wrapper", render($form['email_body']))
+      ajax_command_replace("#email-body-ajax-wrapper", render($form['email_body'])),
+      ajax_command_replace("#available-canned-emails-wrapper", render($form['available_canned_emails'])),
     ),
   );
 
