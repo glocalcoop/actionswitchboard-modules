@@ -4,8 +4,12 @@
  * Menu callback: presents canned email form
  */
 function canned_email_emails() {
-  $node = node_load(arg(1));
-  $user = user_load($node->uid);
+  if(arg(0) == 'node') {
+    $node = node_load(arg(1));
+    $user = user_load($node->uid);
+  }else{
+    $user = user_load(arg(1));
+  }
   drupal_set_title('<em>Send Canned Email to '.$user->name.'</em>', PASS_THROUGH);
   return drupal_get_form('canned_email_form');
 }
@@ -290,7 +294,11 @@ function canned_email_insert_ajax_callback(&$form, &$form_state) {
  * Add the author email as the default email.
  */
 function canned_email_get_author() {
-  $node = node_load(arg(1));
-  $user = user_load($node->uid);
+  if(arg(0) == 'node') {
+    $node = node_load(arg(1));
+    $user = user_load($node->uid);
+  }else{
+    $user = user_load(arg(1));
+  }
   return $user->mail;
 }
