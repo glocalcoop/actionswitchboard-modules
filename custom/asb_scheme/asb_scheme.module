@@ -854,7 +854,7 @@ function asb_scheme_views_pre_render(&$view) {
     }
   }
   if($view->name == 'scheme_members') {
-    dsm($view->header['area']->options['content']);
+    // dsm($view->header['area']->options['content']);
   }
 }
 
