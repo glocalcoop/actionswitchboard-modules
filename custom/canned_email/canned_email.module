@@ -56,14 +56,14 @@ function canned_email_menu() {
   // interface and has to be the same as what was defined
   // in basic_entity_info() above.
   $items['admin/structure/canned_email/manage'] = array(
-    'title' => 'Administer canned_email entity type',
+    'title' => 'Administer Canned Email',
     'page callback' => 'canned_email_list_entities',
     'access arguments' => array('administer canned emails'),
   );
 
   // Add canned email entities.
   $items['admin/structure/canned_email/manage/add'] = array(
-    'title' => 'Add a Canned Email  Entity',
+    'title' => 'Add a Canned Email',
     'page callback' => 'canned_email_entity_add',
     'access arguments' => array('administer canned emails'),
     'type' => MENU_LOCAL_ACTION,
