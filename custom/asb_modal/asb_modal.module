@@ -132,7 +132,7 @@ function asb_modal_block_info() {
  * with add content links.
  */
 function asb_modal_views_pre_view(&$view, &$display_id, &$args) {
-  if($view->name == 'scheme_content'){
+  if($view->views_ui_context !== TRUE && $view->name == 'scheme_content'){
     // here we call asb_modal_settings to theme
     // header content add links
     $header = asb_modal_settings(arg(3), array('update','event','announcement'));
