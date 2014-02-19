@@ -1,2 +1,5 @@
 *~
 /contrib/civicrm
+/contrib/devel_themer
+/contrib/simplehtmldom
+/contrib/masquerade
