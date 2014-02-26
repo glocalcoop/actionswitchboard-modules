@@ -19,4 +19,14 @@ Views:
 https://drupal.org/node/1511396
 Throwing array to string conversion notices.
 
+Message Subscribe:
+https://drupal.org/comment/8508777#comment-8508777
+Add og standalone integration. Adds a view so users can view their subscriptions
+when only og subscriptions exist.
+https://drupal.org/comment/8511065#comment-8511065
+This patch reduces email notifications so they only get sent when "Send Email" is 
+selected..
+https://drupal.org/comment/8520839#comment-8520839
+Allows for rendered field message display.
+
 
