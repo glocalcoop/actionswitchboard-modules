@@ -85,22 +85,6 @@ function asb_message_node_insert($node) {
   $wrapper->field_facilitator_ref->set($facilitator);
   // dsm($node);
   $wrapper->save();
-
-  // Add subscription messages
-  $message = message_create('group_content');
-  $wrapper = entity_metadata_wrapper('message', $message);
-  $wrapper->field_og_ref->set($node->og_group_ref['und'][0]['target_id']);
-  $options = array(
-    'rendered fields' => array(
-      'message_notify_email_subject' => 'field_rendered_og_subject',
-      'message_notify_email_body' => 'field_rendered_og_body',
-    ),
-  );
-  $subscribe_options = array(
-    'subscribe message' => FALSE,
-    'email message' => TRUE,
-  );
-  message_subscribe_send_message('node', $node, $message, array('email' => $options), $subscribe_options);
 }
 
 /**

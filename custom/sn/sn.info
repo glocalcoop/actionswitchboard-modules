@@ -1,0 +1,3 @@
+name = Subscribe Notify
+description = Subscribe API for the Message and Message notify modules.
+core = 7.x
