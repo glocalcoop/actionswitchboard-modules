@@ -101,7 +101,6 @@ function asb_message_node_insert($node) {
     'email message' => TRUE,
   );
   message_subscribe_send_message('node', $node, $message, array('email' => $options), $subscribe_options);
-  }
 }
 
 /**

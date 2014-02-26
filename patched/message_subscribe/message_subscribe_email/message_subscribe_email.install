@@ -16,7 +16,7 @@ function message_subscribe_email_install() {
     'message_subscribe_term' => 'subscribe_taxonomy_term_email:default',
     'message_subscribe_user' => 'subscribe_user_email:default',
     // Setup OG in case it exists.
-    'message_subscribe_og' => 'subscribe_node_email:default',
+    'message_subscribe_og' => 'subscribe_og_email:default',
   );
 
   foreach ($variables as $name => $value) {
@@ -75,7 +75,7 @@ function message_subscribe_email_uninstall() {
     'message_subscribe_term' => 'subscribe_taxonomy_term_email:default',
     'message_subscribe_user' => 'subscribe_user_email:default',
     // Revert OG in case it exists.
-    'message_subscribe_og' => 'subscribe_node_email:default',
+    'message_subscribe_og' => 'subscribe_og_email:default',
   );
 
   foreach ($variables as $name => $value) {

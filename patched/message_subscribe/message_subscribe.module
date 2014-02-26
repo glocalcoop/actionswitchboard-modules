@@ -78,9 +78,11 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
     'queue' => FALSE,
     'entity access' => TRUE,
     'notify_own_actions' => $notify_own_actions,
+    'subscribe message' => TRUE,
+    'email message' => FALSE,
   );
 
-  if (empty($message->mid) && $subscribe_options['save message']) {
+  if (empty($message->mid) && $subscribe_options['save message'] && $subscribe_options['subscribe message']) {
     $message->save();
   }
 
@@ -150,6 +152,10 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
       );
 
       message_notify_send_message($cloned_message, $options, $notifier_name);
+      // If email sent save message with rendered field 
+      if($subscribe_options['email message']) {
+        $cloned_message->save();
+      }
 
       // Check we didn't timeout.
       if ($use_queue && $subscribe_options['queue']['end time'] && time() < $subscribe_options['queue']['end time']) {
