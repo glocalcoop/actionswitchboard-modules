@@ -854,6 +854,18 @@ function asb_scheme_views_pre_render(&$view) {
     }
   }
   if($view->name == 'scheme_members') {
+    global $user;
+    if($node = node_load(arg(1))) {
+      /* dsm($user->roles); */
+      /* dsm($view->header['area']->options['content']); */
+      $roles = array('administrator', 'Facilitator', 'Super Facilitator',);
+      $roles = array('administrator');
+      /* dsm(in_array($user->roles, $roles)); */
+      /* dsm(node_access('update', $node, $user)); */
+      if(!in_array($roles, $user->roles) && $node->uid != $user->uid) {
+        $view->header['area']->options['content'] = '';
+      }
+    }
     // dsm($view->header['area']->options['content']);
   }
 }
