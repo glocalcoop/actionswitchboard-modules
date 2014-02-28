@@ -4,6 +4,7 @@
  * Create variables for the group statistics block.
  */
 function asb_scheme_preprocess_asb_scheme_group_info(&$variables) {
+  global $user;
   if(arg(0) == 'scheme' && is_numeric(arg(1))) {
     $cur_group = node_load(arg(1));
     $group = og_context('node', $cur_group);
@@ -77,7 +78,11 @@ function asb_scheme_preprocess_asb_scheme_group_info(&$variables) {
       // $contact = 'messages/new/' .$manager_id;
       $contact = privatemsg_get_link(user_load($manager_id));
       $variables['managers'][$i] .= '<div class="scheme-leader-contact">';
-      $variables['managers'][$i] .=  l(t('Contact Me'), $contact, array('attributes' => array('class' => array('contact-me'))));
+      if($user->uid != 0) {
+        $variables['managers'][$i] .=  l(t('Contact Me'), $contact, array('attributes' => array('class' => array('contact-me'))));
+      }else{
+        $variables['managers'][$i] .= '<a class="ctools-use-modal ctools-modal-modal-popup-small contact-me" href="/modal_forms/nojs/login">Contact Me</a>';
+      }
       $variables['managers'][$i] .= '</div><!-- Added in asb_scheme/theme.inc -->';
       $first = FALSE;
     }else{

@@ -854,19 +854,14 @@ function asb_scheme_views_pre_render(&$view) {
     }
   }
   if($view->name == 'scheme_members') {
-    global $user;
-    if($node = node_load(arg(1))) {
-      /* dsm($user->roles); */
-      /* dsm($view->header['area']->options['content']); */
-      $roles = array('administrator', 'Facilitator', 'Super Facilitator',);
-      $roles = array('administrator');
-      /* dsm(in_array($user->roles, $roles)); */
-      /* dsm(node_access('update', $node, $user)); */
-      if(!in_array($roles, $user->roles) && $node->uid != $user->uid) {
-        $view->header['area']->options['content'] = '';
+    if($view->display = 'block_1') {
+      global $user;
+      if($node = node_load(arg(1))) {
+        if(!node_access('update', $node, $user) && $node->uid != $user->uid) {
+          $view->header['area']->options['content'] = '';
+        }
       }
     }
-    // dsm($view->header['area']->options['content']);
   }
 }
 
@@ -884,17 +879,26 @@ function asb_scheme_views_post_render(&$view, &$output, &$cache) {
   if($view->name == 'scheme_contribute') {
     $gid = og_context('node');
     if(isset($gid['gid'])){
+      global $user;
       $node = node_load($gid['gid']);
-      $user = user_load($node->uid);
+      $userref = user_load($node->uid);
       $link_markup = '<div class="donate-button"><a href="/';
       if($view->current_display == 'block') {
-        $contact = privatemsg_get_link($user);
-        $link_markup .= $contact .'?skills=1&gid=' .$gid['gid'] .'">Donate Skills</a></div>';
+        if($user->uid != 0) {
+          $contact = privatemsg_get_link($userref);
+          $link_markup .= $contact .'?skills=1&gid=' .$gid['gid'] .'">Donate Skills</a></div>';
+        }else{
+          $link_markup = '<a class="ctools-use-modal ctools-modal-modal-popup-small" href="/modal_forms/nojs/login">Donate Skills</a>';
+        }
         // this strstr function replaces the necessary string.
         $output = strtr($output, array('<!--skills-MESSAGE-->' => $link_markup));
       }elseif($view->current_display == 'block_1') {
-        $contact = privatemsg_get_link($user);
-        $link_markup .= $contact .'?supplies=1&gid=' .$gid['gid'] .'">Donate Supplies</a></div>';
+        if($user->uid !=0) {
+          $contact = privatemsg_get_link($userref);
+          $link_markup .= $contact .'?supplies=1&gid=' .$gid['gid'] .'">Donate Supplies</a></div>';
+        }else{
+          $link_markup = '<a class="ctools-use-modal ctools-modal-modal-popup-small" href="modal_forms/nojs/login">Donate Supplies</a>';
+        }
         $output = strtr($output, array('<!--supplies-MESSAGE-->' => $link_markup));
       }
     }
