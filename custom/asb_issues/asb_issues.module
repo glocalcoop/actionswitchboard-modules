@@ -1,5 +1,27 @@
 <?php
-
+/** 
+ * Implements hook_form_alter()
+ */
+function asb_issues_form_alter(&$form, &$form_state, $form_id) {
+    if($form_id == 'scheme_node_form' || $form_id == 'goal_node_form') {
+    // Here we create an ajax callback that will limit
+    // the taxonomy term selections available based
+    // on which entity is selected in field_issues_goals
+    $form['field_issues_goals']['und']['#ajax'] = array(
+      'event' => 'click',
+      'wrapper' => 'parent-goal-wrapper',
+      'callback' => 'asb_scheme_goals_ajax_callback',
+      'method' => 'replace',
+    );
+    if($form_id == 'scheme_node_form') {
+      $form['field_issues_goals']['#suffix'] = '<div class="goal-rec"><a href="/node/add/goal" target="_blank">Recommend Your Own Goal</a></div>';
+    }
+    // Add a wrapper for the correct field to change
+    $form['field_scheme_goals_taxonomy']['und']['#prefix'] = '<div id="parent-goal-wrapper">';
+    $form['field_scheme_goals_taxonomy']['und']['#suffix'] = '</div>';
+    drupal_add_js(drupal_get_path('module', 'asb_issues') . '/js/issues.js', 'file');
+  }
+}
 /**
  * Implements hook_views_post_execute
  */
@@ -109,4 +131,57 @@ function asb_issues_order_goals($goals) {
     $sorted[$key] = $value;
   }
   return $sorted;
+}
+
+/**
+ * Implements hook_action_info()
+ *
+ * Including rules here because for some reason
+ * rules was not picking up the rules.inc file
+ *
+ */
+function asb_issues_action_info() {
+  return array(
+    'asb_issues_save_goal_action' => array(
+      'type' => 'node',
+      'label' => t('Save goal term on goal approval'),
+      'configurable' => FALSE,
+      'triggers' => array('any'),
+    ),
+  );
+}
+
+
+/**
+ * Sends email to facilitator on scheme creation
+ */
+function asb_issues_save_goal_action($node, $context) {
+  $vid = 5;
+  $parent = '';
+  if(isset($node->field_scheme_goals_taxonomy['und'][0]['tid'])) {
+    $parent = $node->field_scheme_goals_taxonomy['und'][0]['tid'];
+  }
+  // Create the term object
+  $term = new stdClass();
+  $term->vid = $vid;
+  $term->name = $node->title;
+  $term->description = $node->body['und'][0]['value'];
+  $term->parent = $parent;
+  $tree = taxonomy_get_tree(5);
+  $in_tree = FALSE;
+  foreach($tree as $value) {
+    if($value->name != $term->name) {
+      continue;
+    }else{
+      $in_tree = TRUE;
+    }
+  }
+  if($in_tree == FALSE) {
+    taxonomy_term_save($term);
+    drupal_set_message('Goal, ' .$term->name .', saved as taxonomy term.');
+    watchdog('action', 'Saved new goal, %goal, as taxonomy term.', array('%goal' => $term->name));
+  }else{
+    drupal_set_message('Taxonomy term ' .$term->name .' already exists', 'warning');
+    watchdog('action', 'Failed to save new goal, %goal, as taxonomy term.', array('%goal' => $term->name));
+  }
 }
