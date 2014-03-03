@@ -3,14 +3,14 @@
  * Implements hook_form_alter()
  */
 function asb_issues_form_alter(&$form, &$form_state, $form_id) {
-    if($form_id == 'scheme_node_form' || $form_id == 'goal_node_form') {
+  if($form_id == 'scheme_node_form' || $form_id == 'goal_node_form') {
     // Here we create an ajax callback that will limit
     // the taxonomy term selections available based
     // on which entity is selected in field_issues_goals
     $form['field_issues_goals']['und']['#ajax'] = array(
       'event' => 'click',
       'wrapper' => 'parent-goal-wrapper',
-      'callback' => 'asb_scheme_goals_ajax_callback',
+      'callback' => 'asb_issues_goals_ajax_callback',
       'method' => 'replace',
     );
     if($form_id == 'scheme_node_form') {
@@ -21,6 +21,22 @@ function asb_issues_form_alter(&$form, &$form_state, $form_id) {
     $form['field_scheme_goals_taxonomy']['und']['#suffix'] = '</div>';
     drupal_add_js(drupal_get_path('module', 'asb_issues') . '/js/issues.js', 'file');
   }
+  if($form_id == 'issue_node_form') {
+    $form['field_goals_taxonomy']['und']['#options'] = asb_issues_get_top_goals();
+  }
+}
+
+/**
+ * Returns just top level goals to be applied
+ * to selecting issues.
+ */
+function asb_issues_get_top_goals($vid = 5) {
+  $terms = taxonomy_get_tree($vid, 0, 1);
+  $options = array();
+  foreach($terms as $key => $term) {
+    $options[$term->tid] = $term->name;
+  }
+  return $options;
 }
 /**
  * Implements hook_views_post_execute
@@ -74,6 +90,108 @@ function asb_issues_views_pre_render(&$view) {
       $view->result[0]->field_field_all_goals[0]['rendered'] = $output;
     }
   }
+}
+
+/** 
+ *
+ * Add ajax callback for parent goals truncation.
+ * The callback changes the parent goal list so that
+ * only goals that are connected to the issue appear
+ * to the user.
+ */
+function asb_issues_goals_ajax_callback(&$form, &$form_state) {
+  $allowed_goals = asb_issues_get_allowed_terms($form['field_issues_goals']['und']['#value']);
+  // Build the full list of options
+  $field_goals = asb_issues_taxonomy_options('goals');
+  // dsm($field_goals);
+  foreach($field_goals as $key => $value) {
+    if($key != '_none' && !in_array($key, $allowed_goals)) {
+      unset($field_goals[$key]);
+      unset($form['field_scheme_goals_taxonomy']['und']['#options'][$key]);
+    }
+  }
+  // $form['field_scheme_goals_taxonomy']['und']['#options'] = $form['field_scheme_goals_taxonomy']['und']['#options'];
+  if(isset($form['field_scheme_goals_taxonomy']['und']['#options'])) {
+    $form['field_scheme_goals_taxonomy']['und']['#options'] += $field_goals;
+    return $form['field_scheme_goals_taxonomy'];
+  }
+}
+
+
+/**
+ * Returns a hierarchically themed array of taxonomy
+ * terms for use in goal and scheme goal taxonomy fields.
+ **/
+function asb_issues_taxonomy_options($machine_name) {
+  $vocab = taxonomy_vocabulary_machine_name_load($machine_name);
+  $tree = taxonomy_get_tree($vocab->vid);
+  foreach ($tree as $item) {
+    $options[$item->tid] = str_repeat('-', $item->depth) . $item->name;
+  }
+  return $options;
+}
+
+/**
+ * Get allowed goal taxonomy terms for a specific nid
+ */
+function asb_issues_get_allowed_terms($nid) {
+  $value = $nid;
+  $node = node_load($value);
+  $field_ref_type = field_info_instances('node',$node->type);
+  foreach($field_ref_type as $field_name => $field_value) {
+    if($field_value['widget']['type'] == 'taxonomy_shs') {
+      $field = field_get_items('node', $node, $field_name);
+    }elseif($field_value['widget']['type'] == 'options_select') {
+      $field_select = field_get_items('node', $node, $field_name);
+    }
+  }
+  // Create a list of all terms from top parent to
+  // third child
+  // TODO: Figure a way to walk through all children
+  // no matter the depth
+  $top_parents = array();
+  if(!empty($field_select)) {
+    $all_terms = array();
+    foreach($field_select as $key => $term) {
+      $top_parent_term = null;
+      $children_terms = taxonomy_get_children($term['tid']);
+      $all_terms[] = $term['tid'];
+      foreach($children_terms as $k => $child) {
+        $child_children_terms = taxonomy_get_children($child->tid);
+          if(!in_array($child->tid, $all_terms)) {
+            $all_terms[] = $child->tid;
+          }
+        foreach($child_children_terms as $ke => $ch) {
+          if(!in_array($ch->tid, $all_terms)) {
+            $all_terms[] = $ch->tid;
+          }
+        }
+      }
+    }
+  }else{
+    $all_terms = array();
+  }
+  // Get list of terms from the lowest term to the top parent
+  // This is legacy behavior based on our first implementation
+  // it exists to ensure continued functionality for any issues
+  // that might be using the earlier functionality.
+  if(!empty($field)) {
+    $all_terms = array();
+    foreach($field as $key => $term) {
+      $top_parent_term = null;
+      $parent_terms = taxonomy_get_parents_all($term['tid']);
+      foreach($parent_terms as $parent) {
+        $parent_parents = taxonomy_get_parents_all($parent->tid);
+        $all_terms[] = $parent->tid;
+        if(count($parent_parents) == 1) {
+          $top_parents[] = $parent->tid;
+        }
+      }
+    }
+  }elseif(!isset($all_terms)) {
+    $all_terms = array();
+  }
+  return $all_terms;
 }
 
 /**
@@ -144,20 +262,19 @@ function asb_issues_action_info() {
   return array(
     'asb_issues_save_goal_action' => array(
       'type' => 'node',
-      'label' => t('Save goal term on goal approval'),
+      'label' => t('Save goal term and link to issue on goal approval'),
       'configurable' => FALSE,
       'triggers' => array('any'),
     ),
   );
 }
 
-
 /**
- * Sends email to facilitator on scheme creation
+ * Saves goal (node title) as a taxonomy term
  */
 function asb_issues_save_goal_action($node, $context) {
   $vid = 5;
-  $parent = '';
+  $parent = NULL;
   if(isset($node->field_scheme_goals_taxonomy['und'][0]['tid'])) {
     $parent = $node->field_scheme_goals_taxonomy['und'][0]['tid'];
   }
@@ -180,6 +297,23 @@ function asb_issues_save_goal_action($node, $context) {
     taxonomy_term_save($term);
     drupal_set_message('Goal, ' .$term->name .', saved as taxonomy term.');
     watchdog('action', 'Saved new goal, %goal, as taxonomy term.', array('%goal' => $term->name));
+    if(!empty($term) && !isset($node->field_scheme_goals_taxonomy['und'][0]['tid'])) {
+      $issue = node_load($node->field_issues_goals['und'][0]['target_id']);
+      $issue->field_goals_taxonomy[$issue->language][]['tid'] = $term->tid;
+      // dsm($issue);
+      try {
+        node_save($issue);
+        $success = TRUE;
+        drupal_set_message('Goal, '.$node->title .', linked to issue, ' .$issue->title);
+        watchdog('action', 'Linked new goal, %goal, to issue, %issue.', array('%goal' => $term->name, '%issue' => $issue->title));
+      }
+      catch (Exception $e) {
+        drupal_set_message('Failed to link Goal, '.$node->title .', to issue, ' .$issue->title);
+        watchdog('action', 'Failed to link new goal, %goal, to issue, %issue.', array('%goal' => $term->name, '%issue' => $issue->title), WATCHDOG_ERROR);
+      }
+    }else{
+      drupal_set_message("No term found for linking to issue");
+    }
   }else{
     drupal_set_message('Taxonomy term ' .$term->name .' already exists', 'warning');
     watchdog('action', 'Failed to save new goal, %goal, as taxonomy term.', array('%goal' => $term->name));
