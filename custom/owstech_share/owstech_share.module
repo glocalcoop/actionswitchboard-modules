@@ -264,12 +264,6 @@ function owstech_share_return_node_types() {
  * Implements hook_node_view()
  */
 function owstech_share_node_view($node, $view_mode, $langcode) {
-  
-
-  dpm( variable_get('owstech_share_display_type') );
-
-
-
   if ( in_array( 'field', variable_get('owstech_share_display_type') ) ) {
 
     $node_types = variable_get('owstech_share_applied_nodes');
