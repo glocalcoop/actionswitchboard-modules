@@ -319,3 +319,126 @@ function asb_issues_save_goal_action($node, $context) {
     watchdog('action', 'Failed to save new goal, %goal, as taxonomy term.', array('%goal' => $term->name));
   }
 }
+
+/**
+ * Returns all goals for a given argument.
+ */
+function asb_issues_get_all_goals($vid, $tids = array()) {
+  // Terms from previous and next pages are shown if the term tree would have
+  // been cut in the middle. Keep track of how many extra terms we show on each
+  // page of terms.
+  $back_step    = NULL;
+  // An array of the terms to be displayed on this page.
+  $new_terms = array();
+  $delta = 0;
+  $term_deltas = array();
+  $tree = taxonomy_get_tree(5);
+  $term = current($tree);
+  do {
+    if(empty($term)) {
+      break;
+    }
+    $delta++;
+    if(isset($term->depth) && ($term->depth > 0) && !isset($back_step)) {
+      $back_step = 0;
+      while($pterm = prev($tree)) {
+        $back_step++;
+        if($pterm->depth == 0) {
+          prev($tree);
+          continue 2;
+        }
+      }
+    }
+    $new_terms[$term->tid] = $term;
+  }while ($term = next($tree));
+  // print_r($current_page);
+
+  $terms = array();
+  // Build the actual form.
+  $parsed_terms = array();
+  foreach($tids as $k => $value) {
+    $parsed_terms[$value] = $new_terms[$value];
+    $newtree = taxonomy_get_tree(5, $value, NULL);
+    foreach($newtree as $ka => $va) {
+      $parsed_terms[$va->tid] = $new_terms[$va->tid];
+    }
+  }
+  $current_terms = $parsed_terms;
+  foreach ($current_terms as $key => $term) {
+    // Save the term for the current page so we don't have to load it a second time.
+    $terms[$key]['#term'] = (array) $term;
+    if (isset($term->parents)) {
+      $terms[$key]['#term']['parent'] = $term->parent = $term->parents[0];
+      unset($terms[$key]['#term']['parents'], $term->parents);
+    }
+    $terms[$key]['#term'] += array('#type' => 'link', '#title' => $term->name, '#href' => "taxonomy/term/$term->tid");
+  }
+  return $terms;
+}
+
+/**
+ * Create goal tree markup.
+ */
+function asb_issues_theme_goals($terms) {
+  $output = '<ul class="goal-tax">' ."\n";
+  foreach($terms as $key => $term) {
+    if($key != '#parent_fields') {
+      $link = l(t($term['#term']['#title']), $term['#term']['#href'], array('attributes' => array('class' => array('goal-link'))));
+      $output .= '<li class="goal depth-' .$term['#term']['depth'] .' tid-' .$term['#term']['tid'] .'">' .$link ."</li>\n";
+    }
+  }
+  $output .= "</ul>\n";
+  return $output;
+}
+
+function asb_issues_build_goals() {
+  $output = '';
+  if(arg(0) == 'node' && is_numeric(arg(1))) {
+    $node = node_load(arg(1));
+    $tids = array();
+    if($node->type == 'issue' && isset($node->field_goals_taxonomy['und'])) {
+      foreach($node->field_goals_taxonomy['und'] as $key => $value) {
+        $tids[] = $value['tid'];
+      }
+    }
+    $goals = asb_issues_get_all_goals(5,$tids);
+    $output = asb_issues_theme_goals($goals);
+  }elseif(arg(0) == 'taxonomy' && is_numeric(arg(2))) {
+    $parents = taxonomy_get_parents_all(arg(2));
+    $tid = end($parents);
+    $goals = asb_issues_get_all_goals(5,array($tid->tid));
+    $output = asb_issues_theme_goals($goals);
+  }
+  return $output;
+}
+
+/**
+ * Implements hook_block_info().
+ *
+ * Add a goals hierarchy tree block.
+ */
+function asb_issues_block_info() {
+  $blocks['goals_tree'] = array(
+    'info' => t('Goals Tree'),
+    'cache' => DRUPAL_NO_CACHE,
+  );
+  return $blocks;
+}
+
+/**
+ * Implements hook_block_view().
+ *
+ * Add a custom group statistics and create content blocks.
+ */
+function asb_issues_block_view($delta = '') {
+  global $user;
+  $block = array();
+  
+  switch ($delta) {
+    case 'goals_tree':
+      $block['subject'] = t('Associated Goals');
+      $block['content'] = asb_issues_build_goals();
+      break;
+  }
+  return $block;
+}
