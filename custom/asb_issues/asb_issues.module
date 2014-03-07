@@ -24,6 +24,26 @@ function asb_issues_form_alter(&$form, &$form_state, $form_id) {
   if($form_id == 'issue_node_form') {
     $form['field_goals_taxonomy']['und']['#options'] = asb_issues_get_top_goals();
   }
+  // We tweak the add goal form a little for UX
+  if($form_id == 'goal_node_form') {
+    if($form['nid']['#value'] == NULL) {
+      drupal_set_title("Recommend a goal");
+      $form['actions']['submit']['#value'] = "Submit";
+      $form['actions']['preview']['#access'] = FALSE;
+      $form['actions']['submit']['#submit'][] = 'asb_issues_goal_submit';
+    }
+  }
+}
+
+/**
+ * Implements submit handler for goal creation.
+ * This function simply adds a drupal message after submit.
+ */
+function asb_issues_goal_submit($form, &$form_state) {
+  // Here we get the current status messages
+  $messages = drupal_get_messages('status');
+  // Then we set our own status message, instead.
+  drupal_set_message(t("Thank you for submitting a new goal to the Action Switchboard. We will review it and get back to you soon."));
 }
 
 /**
