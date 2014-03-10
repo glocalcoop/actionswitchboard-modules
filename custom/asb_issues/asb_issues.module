@@ -433,7 +433,7 @@ function asb_issues_build_goals() {
     $record = $result->fetchAll();
     if(isset($record[0])) {
       $issue = node_load($record[0]->entity_id);
-      $output .= '<h3 class="issue-title"><a class="issue-link" href="/node/'.$issue->nid .'">Issue: ' .$issue->title .'</a></h3>';
+      $output .= '<h3 class="issue-title">Issue: <a class="issue-link" href="/node/'.$issue->nid .'">' .$issue->title .'</a></h3>';
       $output .= '<h2 class="block-title">Associated Goals</h2>';
     }
              
