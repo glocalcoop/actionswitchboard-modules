@@ -2,6 +2,11 @@
 
 function asb_scheme_init() {
   ctools_include('ajax');
+  mailsystem_set(array(
+      // '{$module}_{$key}' => 'MimeMailSystem', // Just messages with $key sent by $module.
+    'asb_scheme' => 'MimeMailSystem', // All messages sent by $module.
+  ));
+
 }
 
 function asb_scheme_cron() {
@@ -911,13 +916,15 @@ function asb_scheme_email_facilitator_action($node, $context) {
   $result = db_query('SELECT DISTINCT u.mail FROM {users} u INNER JOIN {users_roles} r ON u.uid = r.uid WHERE r.rid = 6');
   // Here we use the token_replace() function to
   // replace any tokens in the action form.
+  
   $params = array(
-    'subject' => token_replace($context['subject'], $context),
-    'body' => token_replace($context['message'], $context),
+    'context' => array(
+      'subject' => token_replace($context['subject'], $context),
+      'body' => token_replace($context['html_message'], $context),
+    ),
+    'plaintext' => "Here's the plaintext message",
   );
   $from = variable_get('site_mail', ini_get('sendmail_from'));
-  $key = 'alert';
-  // $message = array('result' => TRUE);
   // Now, actually send the mails.
   if(empty($context['email_to']) || $context['email_to'] == '') {
     foreach ($result as $row) {
@@ -944,8 +951,9 @@ function asb_scheme_email_facilitator_action($node, $context) {
 function asb_scheme_mail($key, &$message, $params) {
   switch ($key) {
     case 'facilitator': 
-      $message['subject'] = $params['subject'];
-      $message['body'][] = $params['body'];
+      $message['subject'] = $params['context']['subject'];
+      $message['body'][] = $params['context']['body'];
+      $message['body'][] = $params['context']['plaintext'];
       break;
   }
 }
@@ -1024,6 +1032,9 @@ function asb_scheme_email_facilitator_action_form($context) {
   * address is entered.
   *
   */
+  $context += array(
+    'format' => filter_fallback_format(),
+  );
   $form['email_to'] = array(
     '#title' => t('Email address'),
     '#type' => 'textfield',
@@ -1041,6 +1052,13 @@ function asb_scheme_email_facilitator_action_form($context) {
     '#type' => 'textarea',
     '#description' => t('Message to send to the facilitator.'),
     '#default_value' => isset($context['message']) ? $context['message'] : '',
+  );
+  $form['html_message'] = array(
+    '#title' => t('HTML Message Body'),
+    '#type' => 'text_format',
+    '#default_value' => isset($context['html_message']) ? $context['html_message'] : '',
+    '#format' => $context['format'],
+    '#description' => t('HTML formatted message to send to the facilitator.'),
   );
   $form['tokens'] = array(
     '#title' => t('Available Tokens'),
@@ -1074,6 +1092,8 @@ function asb_scheme_email_facilitator_action_submit($form, $form_state) {
     'email_to' => $form_state['values']['email_to'],
     'subject' => $form_state['values']['subject'],
     'message' => $form_state['values']['message'],
+    'html_message' => $form_state['values']['html_message']['value'],
+    'format' => $form_state['values']['html_message']['format'],
   );
 }
 
