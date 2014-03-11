@@ -231,9 +231,11 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
 
       if (!empty($subscribe_options['entity access'])) {
         $account = user_load($uid);
-        if (!entity_access('view', $entity_type, $entity, $account)) {
-          // User doesn't have access to view the entity.
-          continue;
+        if (!isset($entity->og_group_ref) || $entity->group_content_access['und'][0]['value'] != 1) {
+          if (!entity_access('view', $entity_type, $entity, $account)) {
+            // User doesn't have access to view the entity.
+            continue;
+          }
         }
       }
 
