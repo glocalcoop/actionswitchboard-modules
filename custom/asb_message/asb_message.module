@@ -147,15 +147,17 @@ function asb_message_block_view($delta = '') {
 
 function asb_message_get_pms() {
   global $user;
-// Generate the query to load the messages.
-// Replace 'inbox' with 'sent' to display sent messages or 'list' to display all messages.
+  // Generate the query to load the messages.
+  // Replace 'inbox' with 'sent' to display sent messages or 'list' to display all messages.
   $query = _privatemsg_assemble_query('list', $user, 'inbox');
-// Load 5 messages/threads. Replace 5 if you want to display a different amount of messages.
+  // Load 5 messages/threads. Replace 5 if you want to display a different amount of messages.
+  // And create pager 
+  $query->extend('PagerDefault');
   $list = array();
   $tb = array();
   $count=0;
-  foreach ($query->execute() as $thread) {
-    if ($count <=5) {
+  $result = $query->limit(5)->execute();
+  while($thread = $result->fetchObject()) {
       $table_parts = array();
       // Generate a link with the subject as title that points to the view message page.
       // $list[] = l($thread->subject, 'messages/view/'. $thread->thread_id);
@@ -178,9 +180,6 @@ function asb_message_get_pms() {
       $tb[] = array($table_parts['from'],$table_parts['subject'],$table_parts['sent'],$table_parts['reply']);
       $list[] = implode(' ',$list_parts);
       $count++;
-    } else {
-      break;
-    }
   }
 // Display list as a themed item_list.
   $header = array(
@@ -188,7 +187,21 @@ function asb_message_get_pms() {
     'subject' => array('data' => t('Subject')),
     'date' => array('data' => t('Date')),
   );
-  return theme('table', array('header' => $header, 'rows' => $tb, 'attributes' => array( 'class' => array('pmessages'))));
+  // Theme the table with a pager.
+  $output = theme_table(
+    array(
+      'header' => $header,
+      'rows' => $tb,
+      'attributes' => array(
+        'class' => array('pmessages')
+      ),
+      'sticky' => true,
+      'colgroups' => array(),
+      'empty' => t("No messages yet"),
+    )
+  ).theme('pager');
+  return $output;
+  // return theme('table', array('header' => $header, 'rows' => $tb, 'attributes' => array( 'class' => array('pmessages'))));
 }
 
 function asb_message_form_privatemsg_new_alter(&$form, &$form_state) {
