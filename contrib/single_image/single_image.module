@@ -40,7 +40,6 @@ function single_image_field_formatter_settings_form($field, $instance, $view_mod
     '#empty_option' => t('Random'),
     '#element_validate' => array('element_validate_integer_positive'),
   );
-
   return $element;
 }
 
@@ -62,6 +61,9 @@ function single_image_field_formatter_view($entity_type, $entity, $field, $insta
   $element = array();
   if ($items) {
     $delta = $display['settings']['single_image_delta'];
+    if($delta > 0) {
+      $delta = $delta -1;
+    }
     $which = isset($items[$delta]) ? $delta : array_rand($items);
     $items = array($items[$which]);
     $element = image_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display);

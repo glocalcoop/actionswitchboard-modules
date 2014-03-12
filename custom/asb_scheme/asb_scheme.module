@@ -42,6 +42,7 @@ function asb_scheme_entity_info_alter(&$entity_info) {
 function asb_scheme_preprocess_node(&$vars) {
   if($vars['view_mode'] == 'search_teaser') {
     // dsm($vars);
+
     $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__search_teaser';
     $vars['leader'] = asb_scheme_get_scheme_leader($vars['nid']);
     $vars['leader_markup'] = '<div class="scheme-leader"><a href="/user/' .$vars['leader']['uid'] .'">';
