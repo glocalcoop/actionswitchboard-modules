@@ -5,6 +5,7 @@ function sn_node_insert($node) {
   $message = message_create('group_content');
   $wrapper = entity_metadata_wrapper('message', $message);
   $wrapper->field_og_ref->set($node->og_group_ref['und'][0]['target_id']);
+  $wrapper->field_node_ref_with_og->set($node->nid);
   $options = array(
     'rendered fields' => array(
       'message_notify_email_subject' => 'field_rendered_og_subject',
