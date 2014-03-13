@@ -4,6 +4,5 @@
       $('#edit-field-issues-goals-und').find('input[name=field_issues_goals[und]]:checked').click();
       $('#edit-field-scheme-goals-taxonomy').show();
     }
-    $('.page-node-add-goal #edit-field-scheme-goals-taxonomy').hide();
   }
 })(jQuery);
