@@ -782,7 +782,7 @@ function asb_scheme_views_pre_render(&$view) {
     }
   }
   if($view->name == 'scheme_members') {
-    if($view->display = 'block_1') {
+    if($view->current_display = 'block_1') {
       global $user;
       if($node = node_load(arg(1))) {
         if(!node_access('update', $node, $user) && $node->uid != $user->uid) {
@@ -906,9 +906,36 @@ function asb_scheme_action_info() {
       'configurable' => FALSE,
       'triggers' => array('any'),
     ),
+    'asb_scheme_create_civi_scheme_action' => array(
+      'type' => 'node',
+      'label' => t('Create scheme as civicrm organizational contact'),
+      'configurable' => FALSE,
+      'triggers' => array('any'),
+    ),
   );
 }
 
+/**
+ * Creates civicrm organizational group from node.
+ */
+function asb_scheme_create_civi_scheme_action($node, $context) {
+  $author = user_load($node->uid);
+  global $base_url;
+  // Build our data array to pass to civi_api
+  $info = array(
+    'nid' => $node->nid,
+    'scheme_name' => $node->title,
+    'email' => $author->mail,
+    'home_url' => $base_url .'/node/' .$node->nid,
+    'custom_106' => $node->body['und'][0]['summary'],
+    'custom_107' => $node->field_funding_needs['und'][0]['value'],
+  );
+  if(asb_scheme_civicrm_api($type = 'create_contact', 0, $info)) {
+    watchdog('action', 'Added scheme %scheme to civi contacts', array('%scheme' => $info['scheme_name']));
+  }else{
+    watchdog('error', 'Scheme, %scheme with nid %nid, failed to get added to civicrm contacts', array('%scheme' => $info['scheme_name'], '%nid' => $info['nid']));
+  }
+}
 
 /**
  * Sends email to facilitator on scheme creation
@@ -1113,7 +1140,7 @@ function asb_scheme_email_facilitator_action_submit($form, $form_state) {
  * or
  * list of skills from civi custom field
  */
-function asb_scheme_civicrm_api($type = 'contact', $ufid = 0) {
+function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
   if(!isset($config)) {
     require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
     require_once 'CRM/Core/Config.php';
@@ -1174,6 +1201,25 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0) {
                     'sequential' => 1,
                     'option_group_id' => 90,
                   ));
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      $error = $e->getMessage();
+    }
+  }elseif($type == 'create_contact' && $info !== NULL) {
+    try{
+      $params = array(
+        'version' => 3,
+        'sequential' => 1,
+        'contact_type' => 'Organization',
+        'contact_sub_type' => 'Scheme',
+        'organization_name' => $info['scheme_name'],
+        'email' => $info['email'],
+        'external_identifier' => $info['nid'],
+        'home_url' => $info['home_url'],
+        'custom_106' => $info['custom_106'],
+        'custom_107' => $info['custom_107'],
+      );
+      $result = civicrm_api('Contact', 'create', $params);
     }
     catch (CiviCRM_API3_Exception $e) {
       $error = $e->getMessage();
