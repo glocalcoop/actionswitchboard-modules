@@ -916,7 +916,10 @@ function asb_scheme_action_info() {
 }
 
 /**
- * Creates civicrm organizational group from node.
+ * Creates action to add civicrm organizational group from scheme.
+ *
+ * @params
+ *   $info array of values from scheme to insert into org contact.
  */
 function asb_scheme_create_civi_scheme_action($node, $context) {
   $author = user_load($node->uid);
@@ -928,12 +931,20 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
     'email' => $author->mail,
     'home_url' => $base_url .'/node/' .$node->nid,
     'custom_106' => $node->body['und'][0]['summary'],
-    'custom_107' => $node->field_funding_needs['und'][0]['value'],
+    'custom_107' => is_numeric($node->field_funding_needs['und'][0]['value']) ? $node->field_funding_needs['und'][0]['value'] : 0,
   );
-  if(asb_scheme_civicrm_api($type = 'create_contact', 0, $info)) {
-    watchdog('action', 'Added scheme %scheme to civi contacts', array('%scheme' => $info['scheme_name']));
+  $result = asb_scheme_civicrm_api($type = 'create_contact', 0, $info);
+  if($result['is_error'] == 0) {
+    if($result['update'] == 1) {
+      watchdog('action', 'Updated scheme %scheme in civi contacts', array('%scheme' => $info['scheme_name']));
+      drupal_set_message("Scheme updated in civicrm!", 'status');
+    }else{
+      watchdog('action', 'Added scheme %scheme to civi contacts', array('%scheme' => $info['scheme_name']));
+      drupal_set_message("Scheme added to civicrm!", 'status');
+    }
   }else{
     watchdog('error', 'Scheme, %scheme with nid %nid, failed to get added to civicrm contacts', array('%scheme' => $info['scheme_name'], '%nid' => $info['nid']));
+    drupal_set_message("Something went wrong.  Scheme not added to civicrm!", 'warning');
   }
 }
 
@@ -1206,6 +1217,14 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
       $error = $e->getMessage();
     }
   }elseif($type == 'create_contact' && $info !== NULL) {
+    // Check if the scheme is already in civicrm
+    $check_params = array(
+      'version' => 3,
+      'sequential' => 1,
+      'contact_sub_type' => 'Scheme',
+      'external_identifier' => $info['nid'],
+    );
+    $check = civicrm_api('Contact', 'get', $check_params);
     try{
       $params = array(
         'version' => 3,
@@ -1219,7 +1238,17 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
         'custom_106' => $info['custom_106'],
         'custom_107' => $info['custom_107'],
       );
-      $result = civicrm_api('Contact', 'create', $params);
+      // If scheme exists in civicrm update it
+      if($check['count'] > 0) {
+        $params['id'] = $check['id'];
+        $result = civicrm_api('Contact', 'update', $params);
+        $result['update'] = 1;
+      // Else create it
+      }else{
+        $result = civicrm_api('Contact', 'create', $params);
+        $result['update'] = 0;
+      }
+      return $result;
     }
     catch (CiviCRM_API3_Exception $e) {
       $error = $e->getMessage();
