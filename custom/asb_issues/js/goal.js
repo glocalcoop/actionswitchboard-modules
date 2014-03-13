@@ -1,7 +1,9 @@
 (function($) {
   Drupal.behaviors.asbGoal = {
     attach: function(context, settings) {
-      $('.page-node-add-goal').find('#edit-field-scheme-goals-taxonomy').hide();
+      $('#edit-field-scheme-goals-taxonomy', context).once('asbGoal', function () {
+        $(this).hide();
+      });
     }
   }
 })(jQuery);
