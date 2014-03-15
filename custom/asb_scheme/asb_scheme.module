@@ -1423,7 +1423,7 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
             require_once "CRM/PCP/BAO/PCP.php";
             $project_pcp = CRM_PCP_BAO_PCP::add($pcp_params, FALSE);
             $node = node_load($project['values'][$contact_id]['external_identifier']);
-            $node->field_donation_link[LANGUAGE_NONE][0]['value'] = '/civicrm/pcp/info?reset=1&id=' .$project_pcp->id;
+            $node->field_donation_link[LANGUAGE_NONE][0]['value'] = 'civicrm/pcp/info?reset=1&id=' .$project_pcp->id;
             node_save($node);
           }
         }
