@@ -925,13 +925,25 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
   $author = user_load($node->uid);
   global $base_url;
   // Build our data array to pass to civi_api
+  $url = $base_url .'/node/' .$node->nid;
+  if($node->body['und'][0]['summary'] == '') {
+    $body = strip_tags($node->body['und'][0]['value']);
+  }else{
+    $body = strip_tags($node->body['und'][0]['summary']);
+  }
+  $body .= ' -- <a href="' .$url .'">Visit Scheme</a>';
+  if(isset($node->field_funding_needs['und'][0]['value'])) {
+    $funding = is_numeric($node->field_funding_needs['und'][0]['value']) ? $node->field_funding_needs['und'][0]['value'] : 0;
+  }else{
+    $funding = 0;
+  }
   $info = array(
     'nid' => $node->nid,
     'scheme_name' => $node->title,
     'email' => $author->mail,
-    'home_url' => $base_url .'/node/' .$node->nid,
-    'custom_106' => $node->body['und'][0]['summary'],
-    'custom_107' => is_numeric($node->field_funding_needs['und'][0]['value']) ? $node->field_funding_needs['und'][0]['value'] : 0,
+    'home_url' => $url,
+    'custom_106' => $body,
+    'custom_107' => $funding,
   );
   $result = asb_scheme_civicrm_api($type = 'create_contact', 0, $info);
   if($result['is_error'] == 0) {
@@ -1237,16 +1249,52 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
         'home_url' => $info['home_url'],
         'custom_106' => $info['custom_106'],
         'custom_107' => $info['custom_107'],
+        'group_id' => 81,
+        'group' => 81,
       );
       // If scheme exists in civicrm update it
       if($check['count'] > 0) {
         $params['id'] = $check['id'];
+        unset($params['home_url']);
         $result = civicrm_api('Contact', 'update', $params);
         $result['update'] = 1;
-      // Else create it
+        $group_params = array(
+          'version' => 3,
+          'sequential' => 1,
+          'contact_id' => $result['id'],
+          'group_id' => 81,
+        );
+        try{
+          $group_result = civicrm_api('group_contact', 'create', $group_params);
+        }
+        catch (CiviCRM_API3_Exception $e) {
+          // handle error here
+          $errorMessage = $e->getMessage();
+          $errorCode = $e->getErrorCode();
+          $errorData = $e->getExtraParams();
+          return array('error' => $errorMessage, 'error_code' => $errorCode, 'error_data' => $errorData);
+        }
+
+      // Else create the contact
       }else{
         $result = civicrm_api('Contact', 'create', $params);
         $result['update'] = 0;
+        $group_params = array(
+          'version' => 3,
+          'sequential' => 1,
+          'contact_id' => $result['id'],
+          'group_id' => 81,
+        );
+        try{
+          $group_result = civicrm_api('group_contact', 'create', $group_params);
+        }
+        catch (CiviCRM_API3_Exception $e) {
+          // handle error here
+          $errorMessage = $e->getMessage();
+          $errorCode = $e->getErrorCode();
+          $errorData = $e->getExtraParams();
+          return array('error' => $errorMessage, 'error_code' => $errorCode, 'error_data' => $errorData);
+        }
       }
       return $result;
     }
@@ -1310,4 +1358,83 @@ function asb_scheme_date_combo_process_alter(&$element, &$form_state, $context) 
   $element['value2']['#title'] = 'Finish';
   /* dsm($element); */
 
+}
+
+function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
+  //If a contact is being added or readded the Projects Public Group
+  //FIXME what if the group is being removed? disable funding page? Yes, disable them.  
+
+  // Personal campaign pages here http://asb.local/civicrm/admin/pcp?reset=1&page_type=contribute
+  // Parent contribution http://asb.mayfirst.org/civicrm/admin/contribute?reset=1
+
+  // Group is # 81 (which is $ojectId below.
+
+  if ( ($op == 'create' || $op == 'edit') &&
+        $objectName == 'GroupContact' &&
+        $objectId == 81 ) {
+    // Set contact id of changed contact
+    //FIXME We could possibly loop through these to deal with more than one at once.
+    $contact_id = $objectRef[0];
+
+    // Pull contact subtype
+    $contact = civicrm_api("Contact",
+                           "get", 
+                           array ('version' =>'3', 
+                                  'id' =>"$contact_id",
+                                  'return' =>'contact_sub_type')
+                          );
+    // Check if contact subtype is set
+    if (isset($contact['values'][$contact_id]['contact_sub_type'])) {
+
+      // If contact is a Project subtype
+      foreach ($contact['values'][$contact_id]['contact_sub_type'] as $subtype) {
+        // TODO: Change to 'Scheme'
+        if ($subtype == 'Scheme') {
+
+          // Check if there's an existing PCP page
+          require_once 'CRM/Core/DAO.php';
+          $pcp_query = "SELECT id FROM civicrm_pcp WHERE contact_id = $contact_id";
+          $pcp_id = CRM_Core_DAO::singleValueQuery( $pcp_query );
+          // If there is no PCP, create it
+          // FIXME what if the page exists already for this id?  This should be the 
+          // case where the group has been deactivated and now it's being reactivated.
+          // Related to FIXME above about removing a group from Projects Public.
+          if ($pcp_id == NULL) {
+            // Pull the scheme entered data to create the PCP
+
+            $project = civicrm_api("Contact",
+                                   "get", 
+                                   array ('version' =>'3', 
+                                          'id' =>"$contact_id",
+                                          'return' =>'display_name,custom_106,custom_107,external_identifier'
+                                         )
+                                  );
+            // Assemble the parameters to send to add function
+            $pcp_params = array(
+                               'title' => $project['values'][$contact_id]['display_name'],
+                               'intro_text' => $project['values'][$contact_id]['custom_106'],
+                               'goal_amount' => $project['values'][$contact_id]['custom_107'] > 0 ? $project['values'][$contact_id]['custom_107'] : '100.00',
+                               'donate_link_text' => 'Donate Now',
+                               // 'page_text' => $project['values'][$contact_id]['custom_106'],
+                               'is_thermometer' => 1,
+                               'is_honor_roll' => 1,
+                               'is_active' => 1,
+                               'contact_id' => $contact_id,
+                               'page_id' => 11,
+                               'page_type' => 'contribute',
+                               'pcp_block_id' => 3,
+                               'status_id' => 2,
+                               'id' => NULL,
+                              );
+            //Create PCP Page
+            require_once "CRM/PCP/BAO/PCP.php";
+            $project_pcp = CRM_PCP_BAO_PCP::add($pcp_params, FALSE);
+            $node = node_load($project['values'][$contact_id]['external_identifier']);
+            $node->field_donation_link[LANGUAGE_NONE][0]['value'] = '/civicrm/pcp/info?reset=1&id=' .$project_pcp->id;
+            node_save($node);
+          }
+        }
+      }
+    }
+  }
 }
