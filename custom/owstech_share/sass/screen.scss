@@ -1,0 +1,141 @@
+$c-page-bg:  #fff;
+$c-ui-panel: #dedede;
+$c-accent: #EF3F26;
+$c-text: #222;
+
+@font-face {
+  font-family: zocial;
+  src:  url("../fonts/zocial/zocial-regular-webfont.eot");
+  src:  url("../fonts/zocial/zocial-regular-webfont.eot?#iefix") format("embedded-opentype"),
+        url("../fonts/zocial/zocial-regular-webfont.ttf") format("truetype"),
+        url("../fonts/zocial/zocial-regular-webfont.woff") format("woff"),
+        url("../fonts/zocial/zocial-regular-webfont.svg#zocial-regular") format("svg");
+  font-style: normal;
+  font-weight: 400;
+}
+
+%offscreen {
+  position: absolute;
+  right: 200%;
+  overflow: hidden;
+}
+
+.owstech-share {
+
+	width: 13.5em;
+	height: 3rem;
+	overflow: hidden;
+	position: relative;
+
+	h3 {
+		font-size: 1.5rem;
+		margin-top: 0;
+	}
+
+	.actuator {
+		position: absolute;
+		z-index: 5;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		transition-property: left, color, background-color;
+	  transition-duration: .25s;
+	  transition-timing-function: ease-in-out;
+		background: $c-accent;
+		color: white;
+		line-height: 1.5;
+		a {
+			display: block;
+			font-size: inherit;
+			padding: .3125em .5em;
+			vertical-align: baseline;
+			letter-spacing: .075em;
+			text-decoration: none;
+			color: inherit;
+		}
+	}
+	&.active .actuator,
+	&:hover .actuator {
+		left: 100%;
+		a {
+			text-decoration: none;
+		}
+	}
+
+}
+
+.owstech-share {
+	
+	a {
+		outline: none;
+	}
+
+	.drawer {
+		background:#dedede;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+		height: 100%;
+		white-space: nowrap;
+		position: absolute;
+		top: 0;
+		left: 0;
+		li {
+			padding-left: 0;
+			margin-left: 0;
+			display: inline-block;
+			height: 100%;
+		}
+	}
+
+	.drawer a.icon {
+		display: inline-block;
+		width: 2.5rem;
+		height: 100%;
+		color: lighten( $c-text, 50 );
+		line-height: 3;
+		padding: 0;
+		vertical-align: baseline;
+		text-align: center;
+		font-family: zocial !important;
+		text-decoration: none;
+		font-size: 1.5rem;
+		span {
+			@extend %offscreen;
+		}
+		&::before {
+			font-size: 1.25rem;
+			width: 2.5rem;
+			height: 3rem;
+			content: "";
+			font-family: zocial !important;
+			text-align: center;
+		}
+	}
+
+	a.icon:hover {
+		background: $c-text;
+		color: $c-page-bg;
+	}
+
+	a.icon.facebook::before {
+		content: "f";
+	}
+
+	a.icon.twitter::before {
+		content: "t";
+	}
+
+	a.icon.google-plus::before {
+		content: "+";
+	}
+
+	a.icon.reddit::before {
+		content: ">";
+		position: relative;
+	}
+
+}
+
+
