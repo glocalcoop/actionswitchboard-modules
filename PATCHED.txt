@@ -29,4 +29,7 @@ selected..
 https://drupal.org/comment/8520839#comment-8520839
 Allows for rendered field message display.
 
-
+Flag Abuse:
+https://drupal.org/comment/8582013#comment-8582013
+Added whitelisting to the views and flags available.
+This should be fixed in the full release of the module.
