@@ -910,6 +910,20 @@ function asb_scheme_action_info() {
   );
 }
 
+function asb_scheme_rules_action_info() {
+  return array(
+    'asb_scheme_create_civi_scheme_action' => array(
+      'label' => t('Create or update scheme in civicrm.'),
+      'parameter' => array(
+        'node' => array(
+          'type' => 'node',
+          'label' => t('Scheme'),
+        ),
+      ),
+    ),
+  );
+}
+
 /**
  * Creates action to add civicrm organizational group from scheme.
  *
@@ -942,6 +956,16 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
   );
   $result = asb_scheme_civicrm_api($type = 'create_contact', 0, $info);
   if($result['is_error'] == 0) {
+    // Here we reload the pcp identifier and save the node with the correct
+    // value of the path to the campaign page.
+    // We do that here because civicrm_post function can't load the node
+    // with the correct values due a race condition.
+    require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
+    require_once 'CRM/Core/DAO.php';
+    $pcp_query = "SELECT id FROM civicrm_pcp WHERE contact_id = " .$result['values'][0]['id'];
+    $pcp_id = CRM_Core_DAO::singleValueQuery( $pcp_query );
+    $node->field_donation_link[LANGUAGE_NONE][0]['value'] = 'civicrm/pcp/info?reset=1&id=' .$pcp_id;
+    node_save($node);
     if($result['update'] == 1) {
       watchdog('action', 'Updated scheme %scheme in civi contacts', array('%scheme' => $info['scheme_name']));
       drupal_set_message("Scheme updated in civicrm!", 'status');
@@ -1394,7 +1418,6 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
           // Related to FIXME above about removing a group from Projects Public.
           if ($pcp_id == NULL) {
             // Pull the scheme entered data to create the PCP
-
             $project = civicrm_api("Contact",
                                    "get", 
                                    array ('version' =>'3', 
@@ -1404,27 +1427,53 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
                                   );
             // Assemble the parameters to send to add function
             $pcp_params = array(
-                               'title' => $project['values'][$contact_id]['display_name'],
-                               'intro_text' => $project['values'][$contact_id]['custom_106'],
-                               'goal_amount' => $project['values'][$contact_id]['custom_107'] > 0 ? $project['values'][$contact_id]['custom_107'] : '100.00',
-                               'donate_link_text' => 'Donate Now',
-                               // 'page_text' => $project['values'][$contact_id]['custom_106'],
-                               'is_thermometer' => 1,
-                               'is_honor_roll' => 1,
-                               'is_active' => 1,
-                               'contact_id' => $contact_id,
-                               'page_id' => 11,
-                               'page_type' => 'contribute',
-                               'pcp_block_id' => 3,
-                               'status_id' => 2,
-                               'id' => NULL,
-                              );
+              'title' => $project['values'][$contact_id]['display_name'],
+              'intro_text' => $project['values'][$contact_id]['custom_106'],
+              'goal_amount' => $project['values'][$contact_id]['custom_107'] > 0 ? $project['values'][$contact_id]['custom_107'] : '100.00',
+              'donate_link_text' => 'Donate Now',
+              'page_text' => "If this scheme has already reached its funding goal, any additional funds will be offered to make the scheme even more successful, or support a scheme with similar goals.",
+              'is_thermometer' => 1,
+              'is_honor_roll' => 1,
+              'is_active' => 1,
+              'contact_id' => $contact_id,
+              'page_id' => 11,
+              'page_type' => 'contribute',
+              'pcp_block_id' => 3,
+              'status_id' => 2,
+              'id' => NULL,
+            );
             //Create PCP Page
             require_once "CRM/PCP/BAO/PCP.php";
             $project_pcp = CRM_PCP_BAO_PCP::add($pcp_params, FALSE);
-            $node = node_load($project['values'][$contact_id]['external_identifier']);
-            $node->field_donation_link[LANGUAGE_NONE][0]['value'] = 'civicrm/pcp/info?reset=1&id=' .$project_pcp->id;
-            node_save($node);
+          }else{
+            // Pull the scheme entered data to create the PCP
+            $project = civicrm_api("Contact",
+                       "get", 
+                       array ('version' =>'3', 
+                         'id' =>"$contact_id",
+                         'return' =>'display_name,custom_106,custom_107,external_identifier'
+                             )
+                                  );
+            // Assemble the parameters to send to add function
+            $pcp_params = array(
+              'id' => $pcp_id,
+              'title' => $project['values'][$contact_id]['display_name'],
+              'intro_text' => $project['values'][$contact_id]['custom_106'],
+              'goal_amount' => $project['values'][$contact_id]['custom_107'] > 0 ? $project['values'][$contact_id]['custom_107'] : '100.00',
+              'donate_link_text' => 'Donate Now',
+              'page_text' => "If this scheme has already reached its funding goal, any additional funds will be offered to make the scheme even more successful, or support a scheme with similar goals.",
+              'is_thermometer' => 1,
+              'is_honor_roll' => 1,
+              'is_active' => 1,
+              'contact_id' => $contact_id,
+              'page_id' => 11,
+              'page_type' => 'contribute',
+              'pcp_block_id' => 3,
+              'status_id' => 2,
+            );
+            //Update an existing PCP Page
+            require_once "CRM/PCP/BAO/PCP.php";
+            $project_pcp = CRM_PCP_BAO_PCP::add($pcp_params, FALSE);
           }
         }
       }
