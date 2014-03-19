@@ -14,6 +14,16 @@ function asb_scheme_cron() {
   _asb_scheme_update_skills();
 }
 
+/**
+ * Implements hook_views_api().
+ */
+function asb_scheme_views_api() {
+  return array(
+    'api' => 3,
+    'path' => drupal_get_path('module', 'asb_scheme') . 'includes/views',
+  );
+}
+
 /** 
  * Implements hook_comment_view_alter()
  */
