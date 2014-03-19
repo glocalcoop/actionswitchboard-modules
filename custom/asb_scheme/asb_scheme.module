@@ -779,7 +779,13 @@ function asb_scheme_views_pre_render(&$view) {
   if($view->name == 'scheme_members') {
     if($view->current_display = 'block_1') {
       global $user;
+      $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
       if($node = node_load(arg(1))) {
+        $membership = og_get_membership('node', $node->nid, 'user', $user->uid);
+        if(empty($membership) && empty($check)) {
+          // Here we exclude the schemer name from the display.
+          $view->display_handler->handlers['field']['name']->options['exclude'] = 1;
+        }
         if(!node_access('update', $node, $user) && $node->uid != $user->uid) {
           $view->header['area']->options['content'] = '';
         }
@@ -823,6 +829,18 @@ function asb_scheme_views_post_render(&$view, &$output, &$cache) {
           $link_markup = '<a class="ctools-use-modal ctools-modal-modal-popup-small" href="modal_forms/nojs/login">Donate Supplies</a>';
         }
         $output = strtr($output, array('<!--supplies-MESSAGE-->' => $link_markup));
+      }
+    }
+  }
+  if($view->name == 'scheme_members') {
+    if($node = node_load(arg(1))) {
+      global $user;
+      $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
+      $membership = og_get_membership('node', $node->nid, 'user', $user->uid);
+      if(empty($membership) && empty($check)) {
+        // Here we remove tags and identifying markup.
+        $output = strip_tags($output, '<div><ul><li><p><img>');
+        $output = preg_replace('/alt\=\\".*\\".*title\=\\".*\\"/im',"$1",$output); 
       }
     }
   }

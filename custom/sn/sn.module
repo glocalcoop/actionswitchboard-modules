@@ -8,6 +8,7 @@
  */
 function sn_tokens_alter(array &$replacements, array $context) {
   if($context['type'] == 'message' && !empty($context['data']['message'])
+    && isset($replacements[$context['tokens']['field-node-ref-with-og:node-teaser']])
     && $replacements[$context['tokens']['field-node-ref-with-og:node-teaser']] == NULL) {
     $node = node_view(node_load($context['data']['message']->field_node_ref_with_og['und'][0]),'teaser');
     $replacements[$context['tokens']['field-node-ref-with-og:node-teaser']] = $node['body'][0]['#markup'];
