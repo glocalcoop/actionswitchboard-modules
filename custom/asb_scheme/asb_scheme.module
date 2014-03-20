@@ -20,20 +20,8 @@ function asb_scheme_cron() {
 function asb_scheme_views_api() {
   return array(
     'api' => 3,
-    'path' => drupal_get_path('module', 'asb_scheme') . 'includes/views',
+    'path' => drupal_get_path('module', 'asb_scheme') . '/includes/views',
   );
-}
-
-/** 
- * Implements hook_comment_view_alter()
- */
-function asb_scheme_comment_view_alter(&$build) {
-  // dsm($build);
-}
-
-function asb_scheme_link_alter(&$links, $node) {
-  // dsm($links);
-  // dsm($node);
 }
 
 /**
@@ -144,6 +132,13 @@ function theme_asb_scheme_local_task(&$variables) {
   }
 }
 
+/**
+ * Implements hook_menu()
+ *
+ * Ajax call back for displaying updates
+ * and
+ * Call back for approving scheme members
+ */
 function asb_scheme_menu() {
   $items = array();
   $items['asb_scheme/%ctools_js/scheme_content/%/%'] = array(
@@ -154,11 +149,38 @@ function asb_scheme_menu() {
     'file' => 'asb_scheme.pages.inc',
     'type' => MENU_CALLBACK,
   );
+  // Delete a single membership.
+  $items['group/%/%/admin/people/approve-membership/%og_membership'] = array(
+    'title' => 'Approve',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('asb_scheme_approve_membership', 1, 2, 6),
+    'access callback' => 'og_ui_user_access_group',
+    'access arguments' => array('manage members', 1, 2),
+    'file' => 'asb_scheme.admin.inc',
+  );
+
   return $items;
 }
 
-function asb_scheme_test_output() {
-  print "this is what happens when";
+/**
+ * Implements hook_menu_alter()
+ *
+ * We modify the default behavior
+ * of the og_ui module to display our own 
+ * membership management.
+ */
+function asb_scheme_menu_alter(&$items) {
+  $items['node/%/group'] = array(
+    'title' => "Scheme",
+    'page callback' => 'asb_scheme_group_admin_overview',
+    'page arguments' => array('node', 1),
+    'access callback' => 'og_ui_get_group_admin',
+    'access arguments' => array('node', 1),
+    'type' => MENU_LOCAL_TASK,
+    'file' => drupal_get_path('module', 'asb_scheme') .'/asb_scheme.admin.inc',
+    'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
+  );
 }
 
 /**

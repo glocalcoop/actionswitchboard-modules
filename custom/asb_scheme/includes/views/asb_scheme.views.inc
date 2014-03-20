@@ -5,26 +5,14 @@
  * Provides support for the Views module.
  */
 
-/**
- * "OG membership" entity Views definitions.
- */
-class AsbSchemeViewsController extends OgMembershipViewsController {
-  
-  /**
-   * Override views_data().
-   */
-  public function views_data() {
-    $data = parent::views_data();
-    dsm($data);
-    // Link to delete membership.
-    $data['og_membership']['dbutton_membership'] = array(
+function asb_scheme_views_data() {
+  $data = array();
+  $data['og_membership']['approve_button_membership'] = array(
       'field' => array(
-        'title' => t('Delete Button'),
-        'help' => t('Provide a simple delete button fo the membership.'),
-        'handler' => 'asb_scheme_handler_field_og_membership_delete_button',
+          'title' => t('Approve Button'),
+          'help' => t('Provide a simple button to approve the membership.'),
+          'handler' => 'asb_scheme_handler_field_og_membership_approve_button',
       ),
-    );
-
-    return $data;
-  }
+  );
+  return $data;
 }

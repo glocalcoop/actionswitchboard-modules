@@ -2,15 +2,15 @@
 
 /**
  * @file
- * Definition of asb_scheme_handler_field_og_membership_delete_button.
+ * Definition of asb_scheme_handler_field_og_membership_approve_button.
  */
 
 /**
- * Field handler to present a link to delete membership.
+ * Field handler to present a link to approve membership.
  *
  * @ingroup views_field_handlers
  */
-class asb_scheme_handler_field_og_membership_delete_button extends views_handler_field_entity {
+class asb_scheme_handler_field_og_membership_approve_button extends views_handler_field_entity {
 
   function construct() {
     parent::construct();
@@ -53,24 +53,25 @@ class asb_scheme_handler_field_og_membership_delete_button extends views_handler
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['html'] = TRUE;
 
-    // Ensure user has access to delete this membership.
+    // Ensure user has access to approve this membership.
     $og_membership = $this->get_value($values);
     $group_type = $og_membership->group_type;
     $gid = $og_membership->gid;
+    // dsm($og_membership);
     $group = entity_load_single($group_type, $gid);
 
-    if (!og_user_access($group_type, $gid, 'manage members') || $group->uid == $og_membership->etid) {
+    if (!og_user_access($group_type, $gid, 'manage members') || $group->uid == $og_membership->etid || $og_membership->state == 1) {
       return;
     }
 
-    $text = !empty($this->options['text']) ? $this->options['text'] : t('remove');
+    $text = !empty($this->options['text']) ? $this->options['text'] : t('approve');
     unset($this->options['alter']['fragment']);
 
     if (!empty($this->options['destination'])) {
       $this->options['alter']['query'] = drupal_get_destination();
     }
 
-    $this->options['alter']['path'] = "group/" . $group_type . "/" . $gid  . "/admin/people/delete-membership/" . $og_membership->id;
+    $this->options['alter']['path'] = "group/" . $group_type . "/" . $gid  . "/admin/people/approve-membership/" . $og_membership->id;
 
     return $text;
   }
