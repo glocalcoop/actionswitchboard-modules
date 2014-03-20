@@ -8,5 +8,5 @@ dependencies[] = rules
 dependencies[] = privatemsg
 
 files[] = includes/views/asb_scheme.views.inc
-files[] = includes/views/asb_scheme_handler_field_og_membership_delete_button.inc
+;; files[] = includes/views/asb_scheme_handler_field_og_membership_delete_button.inc
 files[] = includes/views/asb_scheme_handler_field_og_membership_approve_button.inc
