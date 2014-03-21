@@ -230,13 +230,17 @@ class views_plugin_cache extends views_plugin {
     }
     if (!empty($this->storage['css'])) {
       foreach ($this->storage['css'] as $args) {
-        drupal_add_css($args['data'], $args);
+        if(isset($args['data'])) {
+          drupal_add_css($args['data'], $args);
+        }
       }
     }
     if (!empty($this->storage['js'])) {
       foreach ($this->storage['js'] as $key => $args) {
         if ($key !== 'settings') {
-          drupal_add_js($args['data'], $args);
+          if(isset($args['data'])) {
+            drupal_add_js($args['data'], $args);
+          }
         }
         else {
           foreach ($args as $setting) {
