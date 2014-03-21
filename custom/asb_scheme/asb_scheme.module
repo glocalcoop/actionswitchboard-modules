@@ -217,10 +217,69 @@ function asb_scheme_form_comment_form_alter(&$form, &$form_state) {
 }
 
 /**
+ * Add submit handler for og subscription
+ */
+function asb_scheme_privatemsg_og_submit(&$form, &$form_state) {
+  $skills = "<strong>I've got skills: </strong>";
+  foreach($form_state['values']['skills'] as $key => $value) {
+    if(!empty($value) || $value != 0) {
+      $skills .= $value .', ';
+    }
+  }
+  $skills = rtrim($skills, ', ');
+  $recipients = array(user_load($form_state['values']['scheme_leader']));
+  $subject = $form_state['values']['subject'];
+  $body = $skills .$form_state['values']['body']['value'];
+  $options = array('format' => 'filtered_html');
+  $result = privatemsg_new_thread($recipients, $subject, $body, $options);
+  if($result == TRUE && !empty($result['message'])) {
+    drupal_set_message(t('Your message was sent.'));
+  }else{
+    drupal_set_message('Something went wrong, your message failed..:-(');
+  }
+}
+/**
  * Implements hook_form_alter
  */
 function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
   global $user;
+  // Add private messaging to the subscribe confirmation
+  if($form_id == 'og_ui_confirm_subscribe') {
+    $scheme = node_load(arg(2));
+    // Turn skills into checkbox options.
+    $skills = array();
+    $items = field_get_items('node', $scheme, 'field_people_skills');
+    foreach($items as $key => $value) {
+      $output = field_view_value('node', $scheme, 'field_people_skills', $value);
+      $skills[$output['#markup']] = $output['#markup'];
+    }
+    $form['privatemsg'] = array(
+      '#title' => t('Introduce Yourself'),
+      '#type' => 'fieldset',
+      '#description' => "Tell us a little about your self and why you'd like to get involved.",
+    );
+    $form['privatemsg']['subject'] = array(
+      '#title' => t('Subject'),
+      '#type' => 'hidden',
+      '#default_value' => $user->name .' wants to join '. $scheme->title,
+    );
+    $form['privatemsg']['skills'] = array(
+      '#title' => t('Select your skills.'),
+      '#type' => 'checkboxes',
+      '#options' => $skills,
+    );
+    $form['privatemsg']['body'] = array(
+      '#title' => t('Message'),
+      '#type' => 'text_format',
+      '#format' => 'filtered_html',
+      '#required' => TRUE,
+    );
+    $form['privatemsg']['scheme_leader'] = array(
+      '#type' => 'hidden',
+      '#default_value' => $scheme->uid,
+    );
+    $form['#submit'][] = 'asb_scheme_privatemsg_og_submit';
+  }
   if($form_id == 'user_login') {
     $form['html_markup'] = array('#markup' => t('<div class="reset-pass"><a class="reset-pass-link" href="/user/password">Forgot your password?</a></div><!-- Added in asb_scheme.module -->'));
   }
@@ -851,12 +910,14 @@ function asb_scheme_views_post_render(&$view, &$output, &$cache) {
       if($view->current_display == 'block') {
         if($user->uid != 0) {
           $contact = privatemsg_get_link($userref);
-          $link_markup .= $contact .'?skills=1&gid=' .$gid['gid'] .'">Donate Skills</a></div>';
+          // $link_markup .= $contact .'?skills=1&gid=' .$gid['gid'] .'">Donate Skills</a></div>';
+          $link_markup .= 'group/node/' .$gid['gid'] .'/subscribe/og_user_node">Donate Skills</a></div>';
         }else{
           $link_markup = '<a class="ctools-use-modal ctools-modal-modal-popup-small" href="/modal_forms/nojs/login">Donate Skills</a>';
         }
         // this strstr function replaces the necessary string.
         $output = strtr($output, array('<!--skills-MESSAGE-->' => $link_markup));
+        // $output = $link_markup;
       }elseif($view->current_display == 'block_1') {
         if($user->uid !=0) {
           $contact = privatemsg_get_link($userref);
