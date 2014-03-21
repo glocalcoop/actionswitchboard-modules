@@ -338,7 +338,7 @@ function asb_message_privatemsg_message_view_alter(&$vars) {
     // TODO: Create custom delete-membership with same
     // style functionality as approve membership.
     $vars['message_links'][] = array('title' => t('Reject Membership'), 'href' => 'group/node/' .$group_id 
-                               .'/admin/people/delete-membership/' .$og_membership->id .'&' .current_path());
+                               .'/admin/people/delete-membership2/' .$og_membership->id .'&' .current_path());
 
   }
 }
