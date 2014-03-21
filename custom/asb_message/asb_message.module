@@ -191,6 +191,7 @@ function asb_message_get_pms() {
   $output = theme_table(
     array(
       'header' => $header,
+      'caption' => '',
       'rows' => $tb,
       'attributes' => array(
         'class' => array('pmessages')
@@ -311,4 +312,33 @@ function asb_message_quicktabs_tabstyles() {
     }
   }
   return $tabstyles;
+}
+
+/**
+ * Implements hook_privatemsg_message_view_alter().
+ */
+function asb_message_privatemsg_message_view_alter(&$vars) {
+  global $user;
+  $filter_check = 2;
+  $account = clone $user;
+  // Get the scheme tags, currently just using tag 2
+  // TODO: create an admin setting (variable) for 
+  // the tag to use for this check.
+  $count = db_query('SELECT count(*) AS count FROM {pm_tags_index} WHERE tag_id = :tag_id AND uid = :uid AND thread_id = :thread_id',
+           array(':tag_id' => $filter_check, ':uid' => $vars['user']->uid, ':thread_id' => $vars['message']->thread_id))->fetchField();
+  $filter = privatemsg_filter_get_filter($account);
+  // If we have a message with both a scheme reference
+  // and a scheme-tag, then we show approve reject links.
+  if($count > 0 && isset($vars['message']->field_scheme_reference['und'][0])) {
+    $author = $vars['message']->author;
+    $group_id = $vars['message']->field_scheme_reference['und'][0]['target_id'];
+    $og_membership = og_get_membership('node', $group_id, 'user', $author->uid);
+    $vars['message_links'][] = array('title' => t('Approve Membership'), 'href' => 'group/node/' .$group_id 
+                               .'/admin/people/approve-membership/' .$og_membership->id .'&' .current_path());
+    // TODO: Create custom delete-membership with same
+    // style functionality as approve membership.
+    $vars['message_links'][] = array('title' => t('Reject Membership'), 'href' => 'group/node/' .$group_id 
+                               .'/admin/people/delete-membership/' .$og_membership->id .'&' .current_path());
+
+  }
 }

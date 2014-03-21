@@ -18,12 +18,23 @@ function asb_scheme_approve_membership($form, &$form_state, $group_type, $gid, $
 
   // Add group membership form. We still don't have the user or state.
   $form_state['og_membership'] = $og_membership;
-
   $membership = $form_state['og_membership'];
   $membership->state = 1;
+
   $membership->save();
+  $path = explode('&', current_path());
+  if(count($path) > 1){
+    $goto = $path[1];
+    $message = explode('/',$goto);
+    $thread_id = $message[2];
+    $tag_ids = array(2);
+    global $user;
+    privatemsg_filter_remove_tags(array($thread_id), $tag_ids, $user);
+  }else{
+    $goto = $group_type .'/' .$gid .'/' . 'group';
+  }
   drupal_set_message(t('The membership was approved.'));
-  drupal_goto($group_type .'/' .$gid .'/' . 'group');
+  drupal_goto($goto);
   return;
 }
 
@@ -63,3 +74,4 @@ function asb_scheme_group_admin_overview($entity_type, $etid) {
   $preview = $view->preview();
   return $preview;
 }
+

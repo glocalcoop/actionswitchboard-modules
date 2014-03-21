@@ -73,8 +73,10 @@ function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
     || (isset($router_item['page_arguments'][0])
       && $router_item['page_arguments'][0] == 'scheme_members')
     || $router_item['path'] == 'node/%/group') {
-    if($router_item['page_arguments'][0]->type == 'scheme'
-      || $router_item['page_arguments'][0] == 'scheme_members'
+    if((isset($router_item['page_arguments'][0]->type) 
+        && $router_item['page_arguments'][0]->type == 'scheme')
+      || (isset($router_item['page_arguments'][0]) 
+        && $router_item['page_arguments'][0] == 'scheme_members')
       || $router_item['path'] == 'node/%/group') {
       $data['tabs'][0]['output'][] = array(
         '#theme' => 'menu_local_task',
@@ -217,23 +219,36 @@ function asb_scheme_form_comment_form_alter(&$form, &$form_state) {
   $form['actions']['submit']['#value'] = t('Submit');
 }
 
+function asb_scheme_privatemsg_message_presave_alter(&$message) {
+  // We turn the gid saved in the asb_pm_og_submit function
+  // into a fielded entity reference.
+  if(isset($message->gid)) {
+    $message->field_scheme_reference['und'][0]['target_id'] = $message->gid;
+  }
+}
+
 /**
  * Add submit handler for og subscription
  */
 function asb_scheme_privatemsg_og_submit(&$form, &$form_state) {
   $skills = "<strong>I've got skills: </strong>";
+  // Build the skills for output
   foreach($form_state['values']['skills'] as $key => $value) {
     if(!empty($value) || $value != 0) {
       $skills .= $value .', ';
     }
   }
   $skills = rtrim($skills, ', ');
+  // Send the message to the scheme leader
   $recipients = array(user_load($form_state['values']['scheme_leader']));
   $subject = $form_state['values']['subject'];
   $body = $skills .$form_state['values']['body']['value'];
-  $options = array('format' => 'filtered_html');
+  // Here we store the gid for later use
+  $options = array('format' => 'filtered_html', 'gid' => $form_state['values']['gid']);
   $result = privatemsg_new_thread($recipients, $subject, $body, $options);
   if($result == TRUE && !empty($result['message'])) {
+    $account = $recipients[0];
+    privatemsg_filter_add_tags(array($result['message']->thread_id), array(2), $account);
     drupal_set_message(t('Your message was sent.'));
   }else{
     drupal_set_message('Something went wrong, your message failed..:-(');
@@ -274,6 +289,10 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#type' => 'text_format',
       '#format' => 'filtered_html',
       '#required' => TRUE,
+    );
+    $form['privatemsg']['gid'] = array(
+      '#type' => 'hidden',
+      '#default_value' => arg(2),
     );
     $form['privatemsg']['scheme_leader'] = array(
       '#type' => 'hidden',
