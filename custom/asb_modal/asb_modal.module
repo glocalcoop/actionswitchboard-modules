@@ -57,16 +57,31 @@ function asb_modal_form_alter(&$form, &$form_state, $form_id) {
     unset($form['group_content_access']['und']['#title']);
     
   }
+  if ($form['#id'] == 'comment-form') {
+    // $form['comment_body'][LANGUAGE_NONE][0]['#wysiwyg'] = FALSE;
+  }
   if($form_id == 'comment_node_scheme_form' || $form_id == 'comment_node_update_form') {
     // Next we add our JavaScript file, named after_ajax.js. This file
     // lives in the /js folder inside our module:
+    $settings = array(
+      'testMe' => '#comment-116',
+    );
     $form['#attached']['js'] = array(
       array(
         'type'  => 'file',
         'data' => drupal_get_path('module', 'asb_modal') . '/js/after_ajax.js',
       ),
+      array(
+        'type' => 'setting',
+        'data' => array(
+          'asb_modal' => array(
+            // Here we send the comment id to javascript for post ajax processing
+            'commentId' => '#comment-' .$form_state['build_info']['args'][0]->pid,
+          ),
+        ),
+      ),
     );
-    // Here we add ajax callbacks tn node forms
+    // Here we add ajax callbacks to node forms
     // based on the node they are associated with
     // We use the comment-wrapper.tpl.php to add 
     // a distinct id to each node form.
@@ -77,6 +92,7 @@ function asb_modal_form_alter(&$form, &$form_state, $form_id) {
       'method' => 'replace',
       'effect' => 'slide'
     );
+    // dsm($form);
   }
   // Add javascript on all modal form loads to change titles
   // And remove other unwanted options from modal forms
@@ -98,22 +114,29 @@ function asb_modal_return_comment_callback(&$form, &$form_state) {
   $form['current_path'] = $path;
   $comment = comment_load($form_state['values']['cid']);
   $comment->ajax_header = '<h2 class="title comment-form">' .t('Thanks for contributing!') .'</h2>';
-  // $comment['ajax_header'] = '<h2 class="title comment-form">' .t('Thanks for contributing!') .'</h2>';
   $node = node_load($form_state['values']['nid']);
   $output = comment_view($comment, $node, 'full');
+  $commands = array();
+  $wrapper = '#ajax-comment-wrap-' .$form_state['build_info']['args'][0]->nid;
+  // These commands handle non-modal javascript
+  $commands[] = ajax_command_replace($wrapper, render($output));
+  $commands[] = array(
+    // The command will be used in our JavaScript file (see next section)
+    'command' => 'afterAjaxCallbackAsb',
+  );
   // If it's a modal we want to provide javascript to
   // close the modal dialog and reload the display.
   if(strpos($form['#action'], 'asb-modal/') != false) {
     $commands = array();
-    $wrapper = 'ajax-comment-wrap-' .$form_state['build_info']['args'][0]->nid;
-    $commands[] = ajax_command_replace($wrapper, $output);
+    $wrapper = '#comment-' .$form_state['build_info']['args'][0]->pid;
+    $commands[] = ajax_command_before($wrapper, render($output));
     $commands[] = array(
-      // The command will be used in our JavaScript file (see next section)
-      'command' => 'afterAjaxCallbackAsb',
+    // The command will be used in our JavaScript file (see next section)
+      'command' => 'afterAjaxCallbackAsbModal',
     );
     return array('#type' => 'ajax', '#commands' => $commands);
   }else{
-    return $output;
+    return array('#type' => 'ajax', '#commands' => $commands);
   }
 }
 

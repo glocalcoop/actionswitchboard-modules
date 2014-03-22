@@ -34,26 +34,30 @@ function asb_scheme_display_view($js = NULL, $view_name, $display_name, $gid) {
     $header = '<p class="scheme-updates-header"><strong>Read about this scheme\'s activities.</strong></p>';
   }
   $options = array(
-     'id' => 'area',
-     'table' => 'views',
-     'field' => 'area',
-     'empty' => TRUE,
-     'content' => $header,
-     'format' => 'full_html',
-     'tokenize' => 0,
-   );
-   $view->display_handler->set_option('header', array('text' => $options));
-   // dsm($view->page);
-   $view->execute();
-   $output = $view->render();
-   // dsm($output);
-   if($js) {
-     ctools_include('ajax');
-     $commands = array();
-     $commands[] = ajax_command_html('#scheme-content', $output);
-     print ajax_render($commands);
+    'id' => 'area',
+    'table' => 'views',
+    'field' => 'area',
+    'empty' => TRUE,
+    'content' => $header,
+    'format' => 'full_html',
+    'tokenize' => 0,
+  );
+  $view->display_handler->set_option('header', array('text' => $options));
+  // dsm($view->page);
+  $view->execute();
+  $output = $view->render();
+  // dsm($output);
+  if($js) {
+    ctools_include('ajax');
+    drupal_add_js(drupal_get_path('module', 'asb_scheme') . '/js/active-tab.js', 'file');
+    $commands = array();
+    $commands[] = ajax_command_html('#scheme-content', $output);
+    $commands[] = array(
+      'command' => 'afterAjaxTabLoad',
+    );
+    print ajax_render($commands);
 
-   }else{
-     return $output;
-   }
+  }else{
+    return $output;
+  }
 }

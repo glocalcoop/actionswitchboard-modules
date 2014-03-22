@@ -114,7 +114,8 @@ function asb_scheme_theme_registry_alter(&$theme_registry) {
 function theme_asb_scheme_local_task(&$variables) {
   // dsm($variables);
   // dsm("Hi dad");
- $link = $variables['element']['#link'];
+
+  $link = $variables['element']['#link'];
   $link_text = $link['title'];
 
   if (!empty($variables['element']['#active'])) {
@@ -130,10 +131,11 @@ function theme_asb_scheme_local_task(&$variables) {
     $link_text = t('!local-task-title!active', array('!local-task-title' => $link['title'], '!active' => $active));
   }
   if(isset($link['localized_options']['attributes']['id']) && $link['localized_options']['attributes']['id'] == 'asb-scheme-ajax-link') {
-    
+    unset($variables['element']['#active']);
     // return '<li' . (!empty($variables['element']['#active']) ? ' class="active ctools-use-ajax"' : '') . '>' . l($link_text, $link['href'], $link['localized_options']) . "</li>\n";   
     // Returns an ajax response tab containing the scheme updates view url
-    return '<li' . (!empty($variables['element']['#active']) ? ' class="active update-tab ctools-use-ajax"' : '') . '>' .ctools_ajax_text_button( 'Updates', 'asb_scheme/nojs/scheme_content/page/' .arg(1), t('Get view content.')) . "</li><!-- Added in asb_scheme module line 61. -->\n";
+    return '<li' . (!empty($variables['element']['#active'])  ? ' class="active update-tab ctools-use-ajax"' : ' class="update-tab ctools-use-ajax"') . '>' .ctools_ajax_text_button( 'Updates', 'asb_scheme/nojs/scheme_content/page/' .arg(1), t('Get view content.')) . "</li><!-- Added in asb_scheme module line 61. -->\n";
+    // return '<li' . (!empty($variables['element']['#active']) ? ' class="active update-tab ctools-use-ajax"' : '') . '>' .ctools_ajax_text_button( 'Updates', 'asb_scheme/nojs/scheme_content/page/' .arg(1), t('Get view content.')) . "</li><!-- Added in asb_scheme module line 61. -->\n";
   }else{ 
     return '<li' . (!empty($variables['element']['#active']) ? ' class="active"' : '') . '>' . l($link_text, $link['href'], $link['localized_options']) . "</li>\n";
   }
