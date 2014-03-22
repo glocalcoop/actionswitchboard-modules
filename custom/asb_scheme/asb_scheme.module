@@ -792,7 +792,7 @@ function asb_scheme_node_view($node, $view_mode, $langcode){
         }
         unset($node->content['field_material_needs']);
         $node->content['field_material_needs'][0]['#markup'] = $material_needs_count;
-        $funding_needs_count = asb_scheme_funds_raised();
+        $funding_needs_count = asb_scheme_funds_raised($node);
         unset($node->content['field_funding_needs']);
         $node->content['field_funding_needs'][0]['#markup'] = $funding_needs_count;
       }
@@ -838,7 +838,7 @@ function asb_scheme_get_view_rowcount(){
   // Check view need_type and return markup for the template.
   if(!empty($view->need_type)) {
     if($view->need_type == 'funds') {
-      $funds_raised = asb_scheme_funds_raised();
+      $funds_raised = asb_scheme_funds_raised(node_load(arg(1)));
       return '<h1 class="funds-raised">$' .$funds_raised .'</h1>';
     }
     if($view->need_type == 'skill') {
@@ -989,8 +989,26 @@ function asb_scheme_val_to_dec($num) {
  * raised for the specific scheme.
  * TODO: Get actual funds raised.
  */
-function asb_scheme_funds_raised() {
-  $raised = rand(1, 1000);
+function asb_scheme_funds_raised($node = NULL) {
+  if($node != NULL) {
+    if(isset($node->field_donation_link['und'][0]['value'])) {
+      $link = explode('&',$node->field_donation_link['und'][0]['value']);
+      if(isset($link[1])) {
+        $pcp_split = explode('=', $link[1]);
+        $pcp_id = $pcp_split[1];
+      }
+    }else{
+      $raised = "0";
+      return $raised;
+    }
+    require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
+    require_once 'CRM/Core/DAO.php';
+    $pcp_query = "SELECT SUM(amount) FROM civicrm_contribution_soft WHERE pcp_id = " .$pcp_id;
+    $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query );
+    $raised = number_format($pcp_donated);
+  }else{
+    $raised = "0";
+  }
   return $raised;
 }
 
@@ -1108,7 +1126,10 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
     require_once 'CRM/Core/DAO.php';
     $pcp_query = "SELECT id FROM civicrm_pcp WHERE contact_id = " .$result['values'][0]['id'];
     $pcp_id = CRM_Core_DAO::singleValueQuery( $pcp_query );
-    $node->field_donation_link[LANGUAGE_NONE][0]['value'] = 'civicrm/pcp/info?reset=1&id=' .$pcp_id;
+    $node->field_donation_link[LANGUAGE_NONE][0]['value'] = 'civicrm/contribute/transact?id=11&pcpId=' .$pcp_id .'&reset=1';
+    // NOTE: If we decide to revert to showing the personal campaign page
+    // uncomment the line below and remove the line above.
+    // $node->field_donation_link[LANGUAGE_NONE][0]['value'] = 'civicrm/pcp/info?reset=1&id=' .$pcp_id;
     node_save($node);
     if($result['update'] == 1) {
       watchdog('action', 'Updated scheme %scheme in civi contacts', array('%scheme' => $info['scheme_name']));
