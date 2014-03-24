@@ -195,7 +195,7 @@ function asb_modal_private_msg($js = NULL, $recipient, $type = 'new') {
   // return array('#type' => 'ajax', '#commands' => $commands);
 }
 
-function asb_modal_og_subscribe($entity_type, $etid, $field_name = NULL, $js = NULL) {
+function asb_modal_og_subscribe($entity_type, $etid, $field_name = NULL, $js = NULL, $type = 'join') {
   global $user;
   module_load_include('inc', 'og_ui', 'og_ui.pages');
   if(!$js) {
@@ -212,6 +212,7 @@ function asb_modal_og_subscribe($entity_type, $etid, $field_name = NULL, $js = N
           'og_user_node',
         ),
       ),
+      'message_type' => $type,
       'ajax' => TRUE,
       're_render' => FALSE,
       'no_redirect' => TRUE,

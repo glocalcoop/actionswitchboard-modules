@@ -44,10 +44,10 @@ function asb_modal_menu() {
     'file' => 'asb_modal.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['asb-modal/group/%/%/subscribe/%/%ctools_js'] = array(
+  $items['asb-modal/group/%/%/subscribe/%/%ctools_js/%'] = array(
     'title' => 'Join Group',
     'page callback' => 'asb_modal_og_subscribe',
-    'page arguments' => array(2, 3, 5, 6),
+    'page arguments' => array(2, 3, 5, 6, 7),
     'access callback' => 'user_is_logged_in',
     'file' => 'asb_modal.pages.inc',
     'type' => MENU_CALLBACK,

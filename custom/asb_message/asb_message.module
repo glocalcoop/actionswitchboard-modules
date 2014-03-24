@@ -348,14 +348,15 @@ function asb_message_privatemsg_message_view_alter(&$vars) {
     $author = $vars['message']->author;
     $group_id = $vars['message']->field_scheme_reference['und'][0]['target_id'];
     $og_membership = og_get_membership('node', $group_id, 'user', $author->uid);
-    $vars['message_links'][] = array('title' => t('Approve Membership'), 'href' => 'group/node/' .$group_id 
-                               .'/admin/people/approve-membership/' .$og_membership->id .'&' .current_path(),
-                               'attributes' => array('class' => 'approve-member'));
-    // TODO: Create custom delete-membership with same
-    // style functionality as approve membership.
-    $vars['message_links'][] = array('title' => t('Reject Membership'), 'href' => 'group/node/' .$group_id 
-                               .'/admin/people/delete-membership2/' .$og_membership->id .'&' .current_path(),
-                               'attributes' => array('class' => 'reject-member'));
-
+    if(!empty($og_membership)) {
+      $vars['message_links'][] = array('title' => t('Approve Membership'), 'href' => 'group/node/' .$group_id 
+                                 .'/admin/people/approve-membership/' .$og_membership->id .'&' .current_path(),
+                                 'attributes' => array('class' => 'approve-member'));
+      $vars['message_links'][] = array('title' => t('Reject Membership'), 'href' => 'group/node/' .$group_id 
+                                 .'/admin/people/delete-membership2/' .$og_membership->id .'&' .current_path(),
+                                 'attributes' => array('class' => 'reject-member'));
+    }else{
+      privatemsg_filter_remove_tags(array($vars['message']->thread_id), array($filter_check), $account);
+    }
   }
 }

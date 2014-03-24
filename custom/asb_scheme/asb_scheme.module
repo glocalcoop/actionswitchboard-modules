@@ -238,6 +238,15 @@ function asb_scheme_privatemsg_message_presave_alter(&$message) {
   }
 }
 
+function asb_scheme_privatemsg_og_validate(&$form, &$form_state) {
+  if($form_state['values']['join'] == 0) {
+    unset($form['#validate'][1]);
+    unset($form['#submit'][0]);
+    $form_state['values']['subject'] = $form_state['sender'] .' wants to donate to '
+      .$form_state['scheme_name'];
+  }
+}
+  
 /**
  * Add submit handler for og subscription
  */
@@ -259,12 +268,23 @@ function asb_scheme_privatemsg_og_submit(&$form, &$form_state) {
   $result = privatemsg_new_thread($recipients, $subject, $body, $options);
   if($result == TRUE && !empty($result['message'])) {
     $account = $recipients[0];
-    privatemsg_filter_add_tags(array($result['message']->thread_id), array(2), $account);
+    if($form_state['values']['join'] == 1) {
+      privatemsg_filter_add_tags(array($result['message']->thread_id), array(2), $account);
+    }
     drupal_set_message(t('Your message was sent.'));
   }else{
     drupal_set_message('Something went wrong, your message failed..:-(');
   }
 }
+
+/**
+ * Implements hook_form_user_login_alter()
+ */
+function asb_scheme_form_user_login_alter(&$form, &$form_state) {
+  $form['name']['#weight'] = -10;
+  $form['pass']['#weight'] = -9;
+}
+
 /**
  * Implements hook_form_alter
  */
@@ -287,6 +307,10 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
         $skills[$output['#markup']] = $output['#markup'];
       }
     }
+    // $form['subject']['#default_value'] = $user->name .' wants to donate to '. $scheme->title;
+    // $form['subject']['#type'] = 'hidden';
+    $form_state['scheme_name'] = $scheme->title;
+    $form_state['sender'] = $user->name;
     $form['privatemsg'] = array(
       '#title' => t('Introduce Yourself'),
       '#type' => 'fieldset',
@@ -302,6 +326,21 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#type' => 'checkboxes',
       '#options' => $skills,
     );
+    (!isset($form_state['message_type'])) ? $form_state['message_type'] = arg(7) : TRUE;
+    if($form_state['message_type'] == 'donate') {
+      $form['privatemsg']['join'] = array(
+        '#title' => t('Check this box to join the scheme.'),
+        '#type' => 'checkbox',
+        '#default_value' => 1,
+      );
+      $form['actions']['submit']['#value'] = 'Send Message';
+    }else{
+      $form['privatemsg']['join'] = array(
+        '#title' => t('Check this box to join the scheme.'),
+        '#type' => 'hidden',
+        '#default_value' => 1,
+      );
+    }
     $form['privatemsg']['body'] = array(
       '#title' => t('Message'),
       '#type' => 'text_format',
@@ -316,14 +355,14 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#type' => 'hidden',
       '#default_value' => $scheme->uid,
     );
+    $form['#validate'][] = $form['#validate'][0];
+    $form['#validate'][0] = 'asb_scheme_privatemsg_og_validate';
     $form['#submit'][] = 'asb_scheme_privatemsg_og_submit';
     $form_state += array(
       'ajax' => TRUE,
       're_render' => FALSE,
       'no_redirect' => TRUE,
     );
-    // dsm($form);
-    // dsm($form_state);
   }
   if($form_id == 'user_login') {
     $form['html_markup'] = array('#markup' => t('<div class="reset-pass"><a class="reset-pass-link" href="/user/password">Forgot your password?</a></div><!-- Added in asb_scheme.module -->'));
@@ -956,7 +995,11 @@ function asb_scheme_views_post_render(&$view, &$output, &$cache) {
         if($user->uid != 0) {
           $contact = privatemsg_get_link($userref);
           // $link_markup .= $contact .'?skills=1&gid=' .$gid['gid'] .'">Donate Skills</a></div>';
-          $link_markup .= 'group/node/' .$gid['gid'] .'/subscribe/og_user_node">Donate Skills</a></div>';
+          // $link_markup .= 'group/node/' .$gid['gid'] .'/subscribe/og_user_node">Donate Skills</a></div>';
+          $donate_link = 'asb-modal/group/node/' .$gid['gid'] .'/subscribe/og_user_node/nojs/donate';
+          $link_markup = '<div class="donate-button">';
+          $link_markup .= ctools_modal_text_button('Donate Skills', $donate_link, t('Donate Skills'), 'ctools-use_modal');
+          $link_markup .= '</div>';
         }else{
           $link_markup = '<a class="ctools-use-modal ctools-modal-modal-popup-small" href="/modal_forms/nojs/login">Donate Skills</a>';
         }
