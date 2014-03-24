@@ -8,6 +8,21 @@
 include_once('asb_message.features.inc');
 
 /**
+ * Implements hook_menu().
+ */
+function asb_message_menu() {
+  $items = array();
+  $items['asb_message/%ctools/new/messages'] = array(
+    // 'page callback' => 'asb_message_get_new_messages_ajax',
+    'page callback' => 'asb_message_get_pms_ajax',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
  * Implements hook_og_membership_insert().
  */
 function asb_message_og_membership_insert($og_membership) {

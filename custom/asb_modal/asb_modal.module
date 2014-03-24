@@ -36,7 +36,22 @@ function asb_modal_menu() {
     'file' => 'asb_modal.pages.inc',
     'type' => MENU_CALLBACK,
   );
-
+  $items['asb-modal/%ctools_js/message/new/%'] = array(
+    'title' => 'Message',
+    'page callback' => 'asb_modal_private_msg',
+    'page arguments' => array(1, 4),
+    'access arguments' => array('post comments'),
+    'file' => 'asb_modal.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+  $items['asb-modal/group/%/%/subscribe/%/%ctools_js'] = array(
+    'title' => 'Join Group',
+    'page callback' => 'asb_modal_og_subscribe',
+    'page arguments' => array(2, 3, 5, 6),
+    'access callback' => 'user_is_logged_in',
+    'file' => 'asb_modal.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
   return $items;
 }
 
@@ -63,9 +78,6 @@ function asb_modal_form_alter(&$form, &$form_state, $form_id) {
   if($form_id == 'comment_node_scheme_form' || $form_id == 'comment_node_update_form') {
     // Next we add our JavaScript file, named after_ajax.js. This file
     // lives in the /js folder inside our module:
-    $settings = array(
-      'testMe' => '#comment-116',
-    );
     $form['#attached']['js'] = array(
       array(
         'type'  => 'file',
@@ -263,7 +275,8 @@ function asb_modal_block_view($block_name) {
     $group = og_context();
     return array(
       'subject' => t('Modal Update Title!'),
-      'content' => ctools_modal_text_button(t('Click Here!'),'asb-modal-callback/nojs/' .$group['gid'], t('Click Here!'), 'ctools-modal-asb-modal-style'),
+      // 'content' => ctools_modal_text_button(t('Click Here!'),'asb-modal-callback/nojs/update/' .$group['gid'], t('Click Here!'), 'ctools-modal-asb-modal-style'),
+      'content' => ctools_modal_text_button(t('Click Here!'),'asb-modal/nojs/message/new/2', t('Send Message!'), 'ctools-use-modal'),
     );
   }
 }

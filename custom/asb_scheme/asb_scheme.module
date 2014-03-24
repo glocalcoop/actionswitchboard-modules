@@ -272,13 +272,20 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
   global $user;
   // Add private messaging to the subscribe confirmation
   if($form_id == 'og_ui_confirm_subscribe') {
-    $scheme = node_load(arg(2));
+    if(arg(0) == 'asb-modal') {
+      $scheme = node_load(arg(3));
+    }else{
+      $scheme = node_load(arg(2));
+    }
+
     // Turn skills into checkbox options.
     $skills = array();
     $items = field_get_items('node', $scheme, 'field_people_skills');
-    foreach($items as $key => $value) {
-      $output = field_view_value('node', $scheme, 'field_people_skills', $value);
-      $skills[$output['#markup']] = $output['#markup'];
+    if(!empty($items)) {
+      foreach($items as $key => $value) {
+        $output = field_view_value('node', $scheme, 'field_people_skills', $value);
+        $skills[$output['#markup']] = $output['#markup'];
+      }
     }
     $form['privatemsg'] = array(
       '#title' => t('Introduce Yourself'),
@@ -310,6 +317,13 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#default_value' => $scheme->uid,
     );
     $form['#submit'][] = 'asb_scheme_privatemsg_og_submit';
+    $form_state += array(
+      'ajax' => TRUE,
+      're_render' => FALSE,
+      'no_redirect' => TRUE,
+    );
+    // dsm($form);
+    // dsm($form_state);
   }
   if($form_id == 'user_login') {
     $form['html_markup'] = array('#markup' => t('<div class="reset-pass"><a class="reset-pass-link" href="/user/password">Forgot your password?</a></div><!-- Added in asb_scheme.module -->'));

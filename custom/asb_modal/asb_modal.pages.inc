@@ -144,3 +144,92 @@ function asb_modal_comment_reply($js = NULL, $node, $pid = NULL) {
   print ajax_render($output);
   // return array('#type' => 'ajax', '#commands' => $commands);
 }
+
+/**
+ * A modal privatemsg callback
+ */
+function asb_modal_private_msg($js = NULL, $recipient, $type = 'new') {
+  ctools_include('modal');
+  ctools_include('ajax');
+  $output = array();
+  $form_state = array();
+  module_load_include('inc', 'privatemsg', 'privatemsg.pages');
+
+  if (!$js) {
+    return drupal_build_form('privatemsg_new', $form_state);
+  }
+
+  /* $form_state = array( */
+  /*   'ajax' => TRUE, */
+  /*   're_render' => FALSE, */
+  /*   'no_redirect' => TRUE, */
+  /* ); */
+  $output = drupal_build_form('privatemsg_new', $form_state);
+  $output = ctools_modal_form_wrapper( 'privatemsg_new', $form_state);
+
+  /* if (!$form_state['executed'] || $form_state['rebuild']) { */
+  /*   $output = ctools_modal_form_render($form_state, $output); */
+  /* } */
+  /* else { */
+  /*   // We'll just overwrite the form output if it was successful. */
+  /*   $output = array(); */
+  /*   // @todo: Uncomment once http://drupal.org/node/1587916 is fixed. */
+  /*   //if (is_array($form_state['redirect'])) { */
+  /*   //  list($path, $options) = $form_state['redirect']; */
+  /*   //  $output[] = ctools_ajax_command_redirect($path, 0, $options); */
+  /*   //} */
+  /*   /\* $commands[] = array( *\/ */
+  /*   /\*         // The command will be used in our JavaScript file (see next section) *\/ */
+  /*   /\*         'command' => 'afterAjaxCallbackAsb', *\/ */
+  /*   /\* ); *\/ */
+
+  /*   if (isset($_GET['destination'])) { */
+  /*     $output[] = ctools_ajax_command_redirect($_GET['destination']); */
+  /*   } */
+  /*   else { */
+  /*     $output[] = ctools_ajax_command_reload(); */
+  /*   } */
+  /* } */
+
+  print ctools_modal_render("New Message", $output);
+  // return array('#type' => 'ajax', '#commands' => $commands);
+}
+
+function asb_modal_og_subscribe($entity_type, $etid, $field_name = NULL, $js = NULL) {
+  global $user;
+  module_load_include('inc', 'og_ui', 'og_ui.pages');
+  if(!$js) {
+    return og_ui_subscribe($entity_type, $etid, $field_name);
+  }else{
+    $output = array();
+    $form_state = array();
+    $form_state = array(
+      'build_info' => array(
+        'args' => array(
+          'node',
+          $etid,
+          $user,
+          'og_user_node',
+        ),
+      ),
+      'ajax' => TRUE,
+      're_render' => FALSE,
+      'no_redirect' => TRUE,
+    );
+    ctools_include('modal');
+    ctools_include('ajax');
+    $output = ctools_modal_form_wrapper('og_ui_confirm_subscribe', $form_state);
+    if (!empty($form_state['executed'])) {
+      // Add the responder javascript, required by ctools
+      ctools_add_js('ajax-responder');
+
+      // Create ajax command array, dismiss the modal window.
+      $output = array();
+      $output[] = ctools_modal_command_dismiss();
+      $output[] = ctools_ajax_command_redirect('node/' .$etid);
+    }
+    print ajax_render($output);
+
+    exit;
+  }
+}  
