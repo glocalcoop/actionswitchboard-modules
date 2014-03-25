@@ -39,8 +39,6 @@ function asb_scheme_entity_info_alter(&$entity_info) {
 */
 function asb_scheme_preprocess_node(&$vars) {
   if($vars['view_mode'] == 'search_teaser') {
-    // dsm($vars);
-
     $vars['theme_hook_suggestions'][] = 'node__' . $vars['type'] . '__search_teaser';
     $vars['leader'] = asb_scheme_get_scheme_leader($vars['nid']);
     $vars['leader_markup'] = '<div class="scheme-leader"><a href="/user/' .$vars['leader']['uid'] .'">';
@@ -55,11 +53,20 @@ function asb_scheme_preprocess_node(&$vars) {
                          'title' => $vars['field_issues_goals'][0]['entity']->title)));
       $vars['content']['issues']['#markup'] = $link_markup;
     }
-    // dsm($vars);
+    
     unset($vars['content']['field_issues_goals']);
-    // TODO: Figure out how to make these numbers legitimate.
-    $vars['fans'] = '1005';
-    $vars['people_count'] = '69';
+    // Set the fans based on flag counts
+    $flags = flag_get_counts('node', $vars['nid']);
+    // If there are no flags set an arbitrary number of fans
+    if(isset($flags['subscribe_og'])) {
+      $vars['fans'] = $flags['subscribe_og'];
+    }else{
+      $vars['fans'] = 69;
+    }
+    // Get og membership for the scheme
+    $members = og_membership_load_multiple(FALSE, array('gid' => $vars['nid'], 'entity_type' => 'user'));
+    // Set the membership count.
+    $vars['people_count'] = count($members);
   }
 }
 
