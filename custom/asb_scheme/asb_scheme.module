@@ -1424,7 +1424,7 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
       $params = array(
         'version' => 3,
         'sequential' => 1,
-        'return' => 'first_name,last_name,city,country,email,state_province,custom_23,custom_23_label,custom_53,custom_53_label',
+        'return' => 'first_name,last_name,city,country,email,state_province,custom_23,custom_23_label,custom_53,custom_53_label,custom_98,custom_93,custom_99',
         'contact_id' => $contact_id['values'][0]['contact_id'],
       );
       $contacts = civicrm_api3('Contact', 'get', $params);
@@ -1436,8 +1436,6 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
       );
       $result = civicrm_api('CustomValue', 'get', $params);
       foreach($result['values'] as $key => $value) {
-	// dsm($key);
-	// dsm($value);
         if($value['id'] == 23) {
           $skill_set = $value['latest'];
         }
@@ -1702,5 +1700,56 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
         }
       }
     }
+  }
+}
+
+function asb_scheme_user_view($account, $view_mode, $langcode) {
+  $ufid = $account->uid;
+  $contact = asb_scheme_civicrm_api('contact',$ufid);
+  if(!empty($contact['values'][0]['custom_98'])) {
+    $account->content['social_links']['twitter'] = array(
+      '#markup' => '<li class="twitter ui-button">' .l('<span>Twitter</span>', $contact['values'][0]['custom_98'], array( 
+                   'attributes' => array(
+                     'class' => 'icon twitter',
+                     'target' => '_blank',
+                   ),
+                   'html' => true,
+                 )) .'</li>'
+    );
+  }else{
+    $account->content['social_links']['twitter'] = array(
+      '#markup' => ''
+    );
+  }
+  if(!empty($contact['values'][0]['custom_93'])) {
+    $account->content['social_links']['facebook'] = array(
+      '#markup' => '<li class="facebook ui-button">' .l('<span>Facebook</span>', $contact['values'][0]['custom_93'], array( 
+                   'attributes' => array(
+                     'class' => 'icon facebook',
+                     'target' => '_blank',
+                   ),
+                   'html' => true,
+                 )) .'</li>'
+    );
+  }else{
+    $account->content['social_links']['facebook'] = array(
+      '#markup' => ''
+    );
+  }
+
+  if(!empty($contact['values'][0]['custom_99'])) {
+    $account->content['social_links']['linkedin'] = array(
+      '#markup' => '<li class="linkedin ui-button">' .l('<span>Linkedin</span>', $contact['values'][0]['custom_99'], array( 
+                   'attributes' => array(
+                     'class' => 'icon linkedin',
+                     'target' => '_blank',
+                   ),
+                   'html' => true,
+                 )) .'</li>'
+    );
+  }else{
+    $account->content['social_links']['linkedin'] = array(
+      '#markup' => ''
+    );
   }
 }
