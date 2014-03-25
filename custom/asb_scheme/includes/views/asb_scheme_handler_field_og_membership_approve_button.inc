@@ -46,12 +46,19 @@ class asb_scheme_handler_field_og_membership_approve_button extends views_handle
 
   function render($values) {
     $value = $this->get_value($values, 'id');
-    return $this->render_link($this->sanitize_value($value), $values);
+    if($values->og_membership_users_state == 2) {
+      return $this->render_link($this->sanitize_value($value), $values);
+    }else{
+      $this->options['alter']['make_link'] = FALSE;
+      $this->options['alter']['html'] = FALSE;
+      return "Current Member";
+    }
   }
 
   function render_link($data, $values) {
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['html'] = TRUE;
+
     // Ensure user has access to approve this membership.
     $og_membership = $this->get_value($values);
     $group_type = $og_membership->group_type;
@@ -61,14 +68,13 @@ class asb_scheme_handler_field_og_membership_approve_button extends views_handle
     if (!og_user_access($group_type, $gid, 'manage members') || $group->uid == $og_membership->etid || $og_membership->state == 1) {
       return;
     }
-
     $text = !empty($this->options['text']) ? $this->options['text'] : t('approve');
     unset($this->options['alter']['fragment']);
 
     if (!empty($this->options['destination'])) {
       $this->options['alter']['query'] = drupal_get_destination();
     }
-
+    
     $this->options['alter']['path'] = "group/" . $group_type . "/" . $gid  . "/admin/people/approve-membership/" . $og_membership->id;
 
     return $text;
