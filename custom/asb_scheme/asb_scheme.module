@@ -1064,7 +1064,7 @@ function asb_scheme_funds_raised($node = NULL) {
         $pcp_id = $pcp_split[1];
       }
     }else{
-      $raised = "0";
+      $raised = "100";
       return $raised;
     }
     require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
@@ -1072,8 +1072,15 @@ function asb_scheme_funds_raised($node = NULL) {
     $pcp_query = "SELECT SUM(amount) FROM civicrm_contribution_soft WHERE pcp_id = " .$pcp_id;
     $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query );
     $raised = number_format($pcp_donated);
+    if($raised == 0) {
+      require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
+      require_once 'CRM/Core/DAO.php';
+      $pcp_query = "SELECT goal_amount FROM civicrm_pcp WHERE id = " .$pcp_id;
+      $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query );
+      $raised = number_format($pcp_donated);
+    }
   }else{
-    $raised = "0";
+    $raised = "100";
   }
   return $raised;
 }
