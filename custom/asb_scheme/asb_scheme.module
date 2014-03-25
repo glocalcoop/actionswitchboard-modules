@@ -1667,7 +1667,7 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
               'contact_id' => $contact_id,
               'page_id' => 11,
               'page_type' => 'contribute',
-              'pcp_block_id' => 3,
+              'pcp_block_id' => 2,
               'status_id' => 2,
               'id' => NULL,
             );
@@ -1697,7 +1697,7 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
               'contact_id' => $contact_id,
               'page_id' => 11,
               'page_type' => 'contribute',
-              'pcp_block_id' => 3,
+              'pcp_block_id' => 2,
               'status_id' => 2,
             );
             //Update an existing PCP Page
