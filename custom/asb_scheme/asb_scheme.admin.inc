@@ -13,7 +13,7 @@ function asb_scheme_approve_membership($form, &$form_state, $group_type, $gid, $
   // You can't approve the group manager.
   if ($group->uid == $account->uid) {
     drupal_set_message(t("You can't approve membership of the group manager"));
-    drupal_goto('group/' . $group_type . '/' . $gid . '/admin/people');
+    drupal_goto($group_type . '/' . $gid . '/group');
   }
 
   // Add group membership form. We still don't have the user or state.
@@ -91,7 +91,7 @@ function asb_scheme_delete_membership($form, &$form_state, $group_type, $gid, $o
   // You can't delete the group manager.
   if ($group->uid == $account->uid) {
     drupal_set_message(t("You can't remove membership of the group manager"));
-    drupal_goto('group/' . $group_type . '/' . $gid . '/admin/people');
+    drupal_goto($group_type . '/' . $gid . '/group');
   }
 
   $path = explode('&', current_path());
@@ -100,7 +100,7 @@ function asb_scheme_delete_membership($form, &$form_state, $group_type, $gid, $o
   $form_state['og_membership'] = $og_membership;
   return confirm_form($form,
     t('Remove membership in group @group', array('@group' => $label)),
-    'group/' . $group_type . '/' . $gid . '/admin/people',
+    $group_type . '/' . $gid . '/group',
     t('Are you sure you would like to remove the membership for the user @user', array('@user' => $account->name)),
     t('Remove'),
     t('Cancel')
