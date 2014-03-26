@@ -1071,11 +1071,11 @@ function asb_scheme_funds_raised($node = NULL) {
     require_once 'CRM/Core/DAO.php';
     $pcp_query = "SELECT SUM(amount) FROM civicrm_contribution_soft WHERE pcp_id = " .$pcp_id;
     $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query );
-    $raised = number_format($pcp_donated);
+    $raised = $pcp_donated;
     $pcp_query2 = "SELECT goal_amount FROM civicrm_pcp WHERE id = " .$pcp_id;
     $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query2 );
-    $goal = number_format($pcp_donated);
-    $raised = $goal - $raised;
+    $goal = $pcp_donated;
+    $raised = number_format($goal - $raised);
   }else{
     $raised = "0";
   }
