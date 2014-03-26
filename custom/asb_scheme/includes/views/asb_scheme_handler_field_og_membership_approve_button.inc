@@ -51,7 +51,7 @@ class asb_scheme_handler_field_og_membership_approve_button extends views_handle
     }else{
       $this->options['alter']['make_link'] = FALSE;
       $this->options['alter']['html'] = FALSE;
-      return "Current Member";
+      return "";
     }
   }
 
