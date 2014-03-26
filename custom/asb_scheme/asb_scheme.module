@@ -329,7 +329,7 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#default_value' => $user->name .' wants to join '. $scheme->title,
     );
     $form['privatemsg']['skills'] = array(
-      '#title' => t('Select your skills.'),
+      '#title' => count($skills) > 0 ? t('Select your skills.') : '',
       '#type' => 'checkboxes',
       '#options' => $skills,
     );
@@ -348,6 +348,7 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
         '#default_value' => 1,
       );
     }
+    $form['actions']['submit']['#value'] = 'Send Request';
     $form['privatemsg']['body'] = array(
       '#title' => t('Message'),
       '#type' => 'text_format',
