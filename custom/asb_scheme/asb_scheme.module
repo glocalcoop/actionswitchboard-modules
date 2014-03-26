@@ -329,7 +329,7 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#default_value' => $user->name .' wants to join '. $scheme->title,
     );
     $form['privatemsg']['skills'] = array(
-      '#title' => count($skills) > 0 ? t('Select your skills.') : '',
+      '#title' => count($skills) > 0 ? t('What skills would you like to offer?') : '',
       '#type' => 'checkboxes',
       '#options' => $skills,
     );
