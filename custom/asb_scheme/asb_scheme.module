@@ -197,7 +197,7 @@ function asb_scheme_menu() {
  */
 function asb_scheme_menu_alter(&$items) {
   $items['node/%/group'] = array(
-    'title' => "Scheme",
+    'title' => "Edit Members",
     'page callback' => 'asb_scheme_group_admin_overview',
     'page arguments' => array('node', 1),
     'access callback' => 'og_ui_get_group_admin',
