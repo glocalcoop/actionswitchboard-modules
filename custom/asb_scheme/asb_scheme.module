@@ -196,6 +196,7 @@ function asb_scheme_menu() {
  * membership management.
  */
 function asb_scheme_menu_alter(&$items) {
+  // Membership management tab
   $items['node/%/group'] = array(
     'title' => "Edit Members",
     'page callback' => 'asb_scheme_group_admin_overview',
@@ -206,6 +207,8 @@ function asb_scheme_menu_alter(&$items) {
     'file' => drupal_get_path('module', 'asb_scheme') .'/asb_scheme.admin.inc',
     'context' => MENU_CONTEXT_PAGE | MENU_CONTEXT_INLINE,
   );
+  // User listing pages.
+  $items['group/%/%/admin/people']['title arguments'] = array('Add schemers to @group', 1, 2);
 }
 
 /**
@@ -297,6 +300,16 @@ function asb_scheme_form_user_login_alter(&$form, &$form_state) {
  */
 function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
   global $user;
+  if($form_id == 'og_ui_add_users') {
+    unset($form['og_user']['roles']);
+    $form['og_user']['#title'] = t('Add a new schemer');
+    $form['return'] = array(
+      '#markup' => '<div class="ui-button back-scheme"><a href="/node/' .$form['gid']['#value'] .
+      '/group title="Back to Scheme">Back to Scheme</a></div>',
+      '#weight' => -1,
+    );
+    $form['actions']['submit']['#value'] = "Add User";
+  }
   // Add private messaging to the subscribe confirmation
   if($form_id == 'og_ui_confirm_subscribe') {
     if(arg(0) == 'asb-modal') {
@@ -1053,8 +1066,7 @@ function asb_scheme_val_to_dec($num) {
 
 /**
  * helper function to get the amount of funds
- * raised for the specific scheme.
- * TODO: Get actual funds raised.
+ * raised for the specific scheme from civicrm
  */
 function asb_scheme_funds_raised($node = NULL) {
   if($node != NULL) {
@@ -1068,6 +1080,7 @@ function asb_scheme_funds_raised($node = NULL) {
       $raised = "0";
       return $raised;
     }
+    // Query civicrm for goal_amount and amount raised
     require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
     require_once 'CRM/Core/DAO.php';
     $pcp_query = "SELECT SUM(amount) FROM civicrm_contribution_soft WHERE pcp_id = " .$pcp_id;
@@ -1076,6 +1089,7 @@ function asb_scheme_funds_raised($node = NULL) {
     $pcp_query2 = "SELECT goal_amount FROM civicrm_pcp WHERE id = " .$pcp_id;
     $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query2 );
     $goal = $pcp_donated;
+    // Subtract amount raised from goal amount and format
     $raised = number_format($goal - $raised);
   }else{
     $raised = "0";
@@ -1715,6 +1729,10 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
   }
 }
 
+/**
+ * Handle social links display on user profile pages
+ * using civicrm social links fields
+ */
 function asb_scheme_user_view($account, $view_mode, $langcode) {
   $ufid = $account->uid;
   $contact = asb_scheme_civicrm_api('contact',$ufid);
@@ -1766,6 +1784,12 @@ function asb_scheme_user_view($account, $view_mode, $langcode) {
   }
 }
 
+/**
+ *
+ * Remove default views_infinite_scroll.js
+ * because it interferes with our version of scrolling
+ *
+ */
 function asb_scheme_js_alter(&$javascript) {
   unset($javascript['sites/all/modules/contrib/views_infinite_scroll/js/views_infinite_scroll.js']);
 }
