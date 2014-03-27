@@ -38,19 +38,7 @@ function asb_scheme_preprocess_asb_scheme_group_info(&$variables) {
   $variables['subscriber_count'] = og_extras_subscriber_count($variables['gid']);
   $variables['subscriber_link'] = l(t("!count members", array('!count' => $variables['subscriber_count'])), 'node/ ' . $variables['gid'] . '/members');
 
-  // @TODO Add a configuration form to select the 'manager' roles for the group.
-  $roles = og_extras_get_roles($variables['gid']);
-  foreach ($roles as $role) {
-    if($role->name == 'Scheme Leader') {
-      $role_rids[] = $role->rid;
-    }
-  }
-
   $variables['manager_uids'] = array($variables['group_node']->uid);
-  foreach (og_extras_get_users_by_roles($variables['gid'], $role_rids) as $item) {
-    $variables['manager_uids'][] = $item->uid;
-  }
-  $variables['manager_uids'] = array_unique($variables['manager_uids']);
   $first = TRUE;
   $filepath = '';
   foreach ($variables['manager_uids'] as $i => $manager_id) {

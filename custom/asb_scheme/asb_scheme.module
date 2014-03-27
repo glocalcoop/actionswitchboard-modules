@@ -1101,16 +1101,10 @@ function asb_scheme_funds_raised($node = NULL) {
  * Get scheme owner(s)
  */
 function asb_scheme_get_scheme_leader($gid) {
-  $sql = "SELECT u.uid, name FROM users u 
-              INNER JOIN og_membership ogm ON u.uid = ogm.etid 
-              INNER JOIN og_users_roles our ON ogm.etid = our.uid 
-              WHERE ogm.gid = '$gid'
-              AND ogm.entity_type = 'user' 
-              AND our.rid = 3 AND our.gid = '$gid'";
-
-  $user_list = db_query($sql)->fetchAll();
-  $scheme_owner = array('name' => $user_list[0]->name, 
-                          'uid' => $user_list[0]->uid);
+  $node = node_load($gid);
+  $account = user_load($node->uid);
+  $scheme_owner = array('name' => $account->name, 
+                          'uid' => $account->uid);
   return $scheme_owner;
 }
 
