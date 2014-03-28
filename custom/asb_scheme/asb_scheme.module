@@ -1417,16 +1417,19 @@ function asb_scheme_email_facilitator_action_submit($form, $form_state) {
  * Implements civicrm_api
  *
  * @params 
- *  $type 'contact' or 'skill'
+ *  $type 'contact', 'create_contact', 'tag', or 'skill'
  *  $ufid - drupal user_id required for contact record.
+ *  $info - any needed additional information
  *
  * @returns
  * array of contact information:
  * first_name, last_name, city, state_province_name, country
  * or
  * list of skills from civi custom field
+ * or 
+ * tag
  */
-function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
+function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL, $params = array()) {
   if(!isset($config)) {
     require_once(DRUPAL_ROOT .'/sites/default/civicrm.settings.php');
     require_once 'CRM/Core/Config.php';
@@ -1444,7 +1447,7 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
       $params = array(
         'version' => 3,
         'sequential' => 1,
-        'return' => 'first_name,last_name,city,country,email,state_province,custom_23,custom_23_label,custom_53,custom_53_label,custom_98,custom_93,custom_99',
+        'return' => 'first_name,last_name,city,country,email,state_province,custom_23,custom_23_label,custom_53,custom_53_label,custom_98,custom_93,custom_99,tag',
         'contact_id' => $contact_id['values'][0]['contact_id'],
       );
       $contacts = civicrm_api3('Contact', 'get', $params);
@@ -1560,6 +1563,28 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL) {
     catch (CiviCRM_API3_Exception $e) {
       $error = $e->getMessage();
     }
+  }elseif($type == 'tag') {
+    // Get a tag
+    $tag = civicrm_api('Tag', 'get', $params);
+    return $tag;
+  }elseif($type == 'tag_create') {
+    try{
+      $tag_create = civicrm_api('Tag', 'create', $params);
+      return $tag_create;
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      // handle error here
+      $errorMessage = $e->getMessage();
+      $errorCode = $e->getErrorCode();
+      $errorData = $e->getExtraParams();
+      return array('error' => $errorMessage, 'error_code' => $errorCode, 'error_data' => $errorData);
+    }
+  }elseif($type == 'tag_add') {
+    $result = civicrm_api('EntityTag', 'create', $params);
+    return $result;
+  }elseif($type == 'tag_remove') {
+    $result = civicrm_api('EntityTag', 'delete', $params);
+    return $result;
   }
   else {
     $contacts = '';

@@ -1,4 +1,13 @@
 <?php
+
+function asb_issues_cron() {
+  // TODO: Make these crons limited to once a day
+  // Create tags to issues
+  asb_issues_sync_civi_interests();
+  // Sync user tags to interests
+  asb_issues_sync_civi_tags()
+}
+
 /** 
  * Implements hook_form_alter()
  */
@@ -368,4 +377,194 @@ function asb_issues_block_view($delta = '') {
       break;
   }
   return $block;
+}
+
+/**
+ * Get issue titles
+ */
+function asb_issues_get_issue_titles() {
+  //This function will do something like
+  $sql = "SELECT DISTINCT title FROM {node} WHERE type = 'issue'";
+  $result = db_query($sql)->fetchAll();
+  return $result;
+}
+
+/**
+ * Compare issue titles with civicrm tags
+ */
+function asb_issues_compare_civi_tags($titles) {
+  // Determine if the issue tag exists, if not, create it
+  $parent = asb_issues_civi_parent_tag();
+  foreach($titles as $key => $title) {
+    $params = array(
+      'version' => 3,
+      'sequential' => 1,
+      'name' => trim($title->title),
+    );
+    $civi_tag = asb_scheme_civicrm_api('tag', 0, NULL, $params = $params);
+    if(isset($civi_tag['values'][0]['name'])) {
+      continue;
+    }else{
+      // Create the tag trimming to avoid extra white space.
+      asb_issues_create_tag(trim($title->title), $parent);
+    }
+  }
+}
+
+/** 
+ * Get the parent tag id
+ */
+function asb_issues_civi_parent_tag() {
+  $tag = '';
+  // This tag should always be named Interests
+  $params = array(
+    'version' => 3,
+    'sequential' => 1,
+    'name' => 'Interests',
+    );
+  $civi_tag = asb_scheme_civicrm_api('tag', 0, NULL, $params = $params);
+  if(isset($civi_tag['values'][0]['name'])) {
+    return $civi_tag['id'];
+  }else{
+    asb_issues_create_tag($title);
+    $tag = asb_scheme_civicrm_api('tag', 0, NULL, $params = $params);
+    return $tag['id'];
+  }
+}
+
+/**
+ * Create a civicrm tag
+ */
+function asb_issues_create_tag($title, $parent = NULL) {
+  $params = array(
+    'version' => 3,
+    'sequential' => 1,
+    'name' => $title,
+    'description' => empty($parent) ? 'Issues\/Interests selected in the user profile' : '',
+    'parent_id' => $parent,
+    'is_selectable' => 1,
+    'is_reserved' => 1,
+  );
+  $create_tag = asb_scheme_civicrm_api('tag_create', 0, NULL, $params);
+}
+
+/**
+ * Main function for syncing issues with tags.
+ * Should not change often.
+ */
+ 
+function asb_issues_sync_civi_interests() {
+  $titles = asb_issues_get_issue_titles();
+  asb_issues_compare_civi_tags($titles);
+}
+
+/**
+ * Build and execute a query to pull in all of the
+ * listed interests for all users.
+ */
+function asb_issues_get_users_interests() {
+  $user_interests = array();
+  $sql = "SELECT {users}.uid uid, {field_data_field_issue_reference}.field_issue_reference_target_id nid, 
+         {node}.title 
+           FROM {users} 
+             LEFT JOIN {field_data_field_issue_reference} 
+             ON entity_id = uid 
+               LEFT JOIN {node} on {node}.nid = {field_issue_reference_target_id} 
+               WHERE {field_issue_reference_target_id} 
+                 IS NOT NULL AND {field_data_field_issue_reference}.entity_type = 'user' 
+                 ORDER BY uid";
+  $result = db_query($sql)->fetchAll();
+  foreach($result as $key => $value) {
+    if(!isset($user_interests[$value->uid])) {
+      $user_interests[$value->uid] = array(
+        'titles' => array( 
+          trim($value->title),
+        )
+      );
+    }else{
+      $user_interests[$value->uid]['titles'][] = trim($value->title);
+    }
+  }
+  return $user_interests;
+}
+
+/**
+ * Run the necessary functions to sync tags
+ * with the correct user
+ */
+function asb_issues_sync_civi_tags() {
+  $user_interests = asb_issues_get_users_interests();
+  foreach($user_interests as $uid => $value) {
+    $contact = asb_scheme_civicrm_api('contact', $uid, NULL);
+    asb_issues_add_civi_issue_tags($contact, $user_interests[$uid]);
+  }
+}
+
+/**
+ * Parse all the tags and add or removed them.
+ */
+function asb_issues_add_civi_issue_tags($contact, $user_interests) {
+  // Get a list of all our relevant tags.
+  $issue_tags = asb_issues_get_all_issue_tags();
+  $tags = explode( ',', $contact['values'][0]['tags']);
+  // Remove the Intersts tag, b/c we never want to touch it.
+  $tags = array_diff($tags, array("Interests"));
+  // Establish primary parameters for civi
+  $params = array(
+    'version' => 3,
+    'sequential' => 1,
+    'contact_id' => $contact['id'],
+    'tag_id' => '',
+  );
+  $delete_tags = array();
+  $create_tags = array();
+  // If tags already exist we need to compare them to the selected 
+  // user interests and make sure they're still the same.
+  if(count($tags) > 1) {
+    if(isset($user_interests['titles'])) {
+      // Create arrays of tags to be added to the civi contact
+      // and those to be deleted
+      $delete_tags = array_diff($tags, $user_interests['titles']);
+      $create_tags = array_diff($user_interests['titles'],$tags);
+    }
+    // otherwise we just add all the interests as tags.
+  }elseif(isset($user_interests['titles'])) {
+    $create_tags = $user_interests['titles'];
+  }
+  // Loop through tags to add or remove and then do so.
+  foreach($create_tags as $key => $value) {
+    // just in case we trim whitespace
+    $value = trim($value);
+    $params['tag_id'] = $issue_tags[$value];
+    $result = asb_scheme_civicrm_api('tag_add', 0, NULL, $params);
+    if($result['is_error'] == 1) {
+      watchdog('error', 'Something went wrong with tag/issue syncing on civicrm.');
+    }
+  }
+  foreach($delete_tags as $key =>$value) {
+    $value = trim($value);
+    $params['tag_id'] = $issue_tags[$value];
+    $result = asb_scheme_civicrm_api('tag_remove', 0, NULL, $params);
+    if($result['is_error'] == 1) {
+      watchdog('error', 'Something went wrong with tag/issue syncing to civicrm.');
+    }
+  }
+}
+
+/**
+ * Get the full list of issue tags
+ */
+function asb_issues_get_all_issue_tags() {
+  $parent = asb_issues_civi_parent_tag();
+  $params = array(
+    'version' => 3,
+    'sequential' => 1,
+    'parent_id' => $parent,
+  );
+  $civi_tag = asb_scheme_civicrm_api('tag', 0, NULL, $params = $params);
+  $civi_tags = array();
+  foreach($civi_tag['values'] as $key => $value) {
+    $civi_tags[$value['name']] = $value['id'];
+  }
+  return $civi_tags;
 }
