@@ -5,7 +5,7 @@ function asb_issues_cron() {
   // Create tags to issues
   asb_issues_sync_civi_interests();
   // Sync user tags to interests
-  asb_issues_sync_civi_tags()
+  asb_issues_sync_civi_tags();
 }
 
 /** 
