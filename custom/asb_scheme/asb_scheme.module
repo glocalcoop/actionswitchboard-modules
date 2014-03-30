@@ -1606,7 +1606,7 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL, $par
 function asb_scheme_get_civi_skills($skills_info, $civi_skills) {
   global $user;
   $ufid = $user->uid;
-  $civi_skills = asb_scheme_civicrm_api($ufid);
+  $civi_skills = asb_scheme_civicrm_api('skills', $ufid);
   $skills_values = array();
   foreach($civi_skills['values'] as $key => $value) {
     $skills_values[$value['value']] = $value['label'];
@@ -1625,7 +1625,6 @@ function asb_scheme_get_civi_skills($skills_info, $civi_skills) {
 function _asb_scheme_update_skills() {
   $field_name = 'field_people_skills';
   $instance = field_info_field($field_name);
-  // dsm($instance);
   $skills = asb_scheme_civicrm_api('skills');
   $civi_skills = asb_scheme_get_civi_skills($instance, $skills);
   $field = array(
