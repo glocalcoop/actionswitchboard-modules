@@ -1819,7 +1819,8 @@ function asb_scheme_user_view($account, $view_mode, $langcode) {
  *
  */
 function asb_scheme_js_alter(&$javascript) {
-  unset($javascript['sites/all/modules/contrib/views_infinite_scroll/js/views_infinite_scroll.js']);
+  $vis_path = drupal_get_path( 'module', 'views_infinite_scroll' );
+  unset( $javascript[$vis_path.'/js/views_infinite_scroll.js']);
 }
 
 /**
