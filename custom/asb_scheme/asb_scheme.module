@@ -6,6 +6,7 @@ function asb_scheme_init() {
       // '{$module}_{$key}' => 'MimeMailSystem', // Just messages with $key sent by $module.
     'asb_scheme' => 'MimeMailSystem', // All messages sent by $module.
   ));
+  asb_scheme_remove_extra_leaders();
 
 }
 
@@ -1196,6 +1197,8 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
     'custom_107' => $funding,
   );
   $result = asb_scheme_civicrm_api($type = 'create_contact', 0, $info);
+  global $user;
+  $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
   if($result['is_error'] == 0) {
     // Here we reload the pcp identifier and save the node with the correct
     // value of the path to the campaign page.
@@ -1212,14 +1215,20 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
     node_save($node);
     if($result['update'] == 1) {
       watchdog('action', 'Updated scheme %scheme in civi contacts', array('%scheme' => $info['scheme_name']));
-      drupal_set_message("Scheme updated in civicrm!", 'status');
+      if(!empty($check)) {
+        drupal_set_message("Scheme updated in civicrm!", 'status');
+      }
     }else{
       watchdog('action', 'Added scheme %scheme to civi contacts', array('%scheme' => $info['scheme_name']));
-      drupal_set_message("Scheme added to civicrm!", 'status');
+      if(!empty($check)) {
+        drupal_set_message("Scheme added to civicrm!", 'status');
+      }
     }
   }else{
     watchdog('error', 'Scheme, %scheme with nid %nid, failed to get added to civicrm contacts', array('%scheme' => $info['scheme_name'], '%nid' => $info['nid']));
-    drupal_set_message("Something went wrong.  Scheme not added to civicrm!", 'warning');
+    if(!empty($check)) {
+      drupal_set_message("Something went wrong.  Scheme not added to civicrm!", 'warning');
+    }
   }
 }
 
@@ -1811,4 +1820,39 @@ function asb_scheme_user_view($account, $view_mode, $langcode) {
  */
 function asb_scheme_js_alter(&$javascript) {
   unset($javascript['sites/all/modules/contrib/views_infinite_scroll/js/views_infinite_scroll.js']);
+}
+
+/**
+ * Find and remove extra scheme leaders.
+ */
+function asb_scheme_remove_extra_leaders() {
+  $sql = "SELECT gid, count(*) as leaders FROM og_users_roles WHERE rid = 3 GROUP BY gid HAVING leaders > 1";
+  $result = db_query($sql)->fetchAll();
+  $remove_role = array();
+  foreach($result as $key => $value) {
+    $sql = "SELECT og_users_roles.uid 
+             FROM og_users_roles 
+               LEFT JOIN {node} 
+               ON node.uid != og_users_roles.uid 
+             WHERE gid = :gid
+               AND nid = :nid
+               AND type = 'scheme' 
+               AND rid = 3";
+    $result = db_query($sql, array(
+                ':gid' => $value->gid, 
+                ':nid' => $value->gid,
+              ))->fetchAll();
+    foreach($result as $k => $uid) {
+      if(!isset($remove_role[$value->gid])) {
+        $remove_role[$value->gid] = array($uid->uid);
+      }else{
+        $remove_role[$value->gid][] = $uid->uid;
+      }
+    }
+  }
+  foreach($remove_role as $gid => $uids) {
+    foreach($uids as $k => $uid) {
+      og_role_revoke('node', $gid, $uid, 3);
+    }
+  }
 }
