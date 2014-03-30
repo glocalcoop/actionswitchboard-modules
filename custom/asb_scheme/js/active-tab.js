@@ -8,6 +8,8 @@
      // Add active class to tab
      $('li.update-tab').addClass('active');
      $('li.update-tab').find('a').addClass('active');
-     // Now we close the modal
+     // Now let's remove unwanted  views and comments
+     $('section.related-schemes').next('.comments-wrapper').remove();
+     $('section.related-schemes').remove();
    };
 }(jQuery, Drupal));
