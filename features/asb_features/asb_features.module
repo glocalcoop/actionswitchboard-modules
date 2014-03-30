@@ -1,0 +1,7 @@
+<?php
+/**
+ * @file
+ * Code for the asb_features feature.
+ */
+
+include_once 'asb_features.features.inc';
