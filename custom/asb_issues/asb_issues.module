@@ -513,7 +513,7 @@ function asb_issues_add_civi_issue_tags($contact, $user_interests) {
   $params = array(
     'version' => 3,
     'sequential' => 1,
-    'contact_id' => $contact['id'],
+    'contact_id' => isset($contact['id']) ? $contact['id'] : '',
     'tag_id' => '',
   );
   $delete_tags = array();
