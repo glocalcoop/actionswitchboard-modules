@@ -1457,7 +1457,7 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL, $par
         'version' => 3,
         'sequential' => 1,
         'return' => 'first_name,last_name,city,country,email,state_province,custom_23,custom_23_label,custom_53,custom_53_label,custom_98,custom_93,custom_99,tag',
-        'contact_id' => $contact_id['values'][0]['contact_id'],
+        'contact_id' => isset($contact_id['values'][0]['contact_id']) ? $contact_id['values'][0]['contact_id'] : '',
       );
       $contacts = civicrm_api3('Contact', 'get', $params);
       $contacts['skills'] = array();
