@@ -5,6 +5,7 @@
  */
 function flag_abuse_views_default_views() {
   $views = $functions = array();
+
   if (module_exists('flag')) {
     $api_type = flag_abuse_get_api_type();
     foreach (array_filter(flag_abuse_get_abuse_flags()) as $flag_name) {

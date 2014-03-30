@@ -1853,6 +1853,7 @@ function asb_scheme_remove_extra_leaders() {
   foreach($remove_role as $gid => $uids) {
     foreach($uids as $k => $uid) {
       og_role_revoke('node', $gid, $uid, 3);
+      og_role_grant('node', $gid, $uid, 4);
     }
   }
 }
