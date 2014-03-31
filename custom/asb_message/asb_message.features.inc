@@ -12,6 +12,12 @@ function asb_message_ctools_plugin_api() {
   if ($module == "strongarm" && $api == "strongarm") {
     return array("version" => "1");
   }
+  if ($module == 'quicktabs' && $api == 'quicktabs') {
+    return array(
+      'version' => '1',
+      'path' => drupal_get_path('module', 'asb_message') . '/exports'
+    );
+  }
 }
 
 /**
@@ -104,3 +110,4 @@ function asb_message_default_message_type() {
   }');
   return $items;
 }
+
