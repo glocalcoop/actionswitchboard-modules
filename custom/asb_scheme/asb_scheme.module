@@ -525,6 +525,7 @@ function asb_scheme_modal_after_build($form) {
   global $user;
   $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
   if($check != TRUE) {
+    $form['privatemsg']['body']['format']['help']['#attributes']['class'][] = 'invisible no-format-select';
     $form['privatemsg']['body']['format']['format']['#attributes']['class'][] = 'invisible no-format-select';
     $form['privatemsg']['body']['format']['format']['#title_display'] = 'none';
   }
