@@ -385,6 +385,7 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       're_render' => FALSE,
       'no_redirect' => TRUE,
     );
+    $form['#after_build'][] = 'asb_scheme_modal_after_build';
   }
   if($form_id == 'user_login') {
     $form['html_markup'] = array('#markup' => t('<div class="reset-pass"><a class="reset-pass-link" href="/user/password">Forgot your password?</a></div><!-- Added in asb_scheme.module -->'));
@@ -515,6 +516,19 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       );
     }
   }
+}
+
+/** 
+ * After build form adjustment
+ */ 
+function asb_scheme_modal_after_build($form) {
+  global $user;
+  $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
+  if($check != TRUE) {
+    $form['privatemsg']['body']['format']['format']['#attributes']['class'][] = 'invisible no-format-select';
+    $form['privatemsg']['body']['format']['format']['#title_display'] = 'none';
+  }
+  return $form;
 }
 
 /**
