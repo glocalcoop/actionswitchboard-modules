@@ -10,288 +10,6 @@
 function asb_features_menu_default_menu_links() {
   $menu_links = array();
 
-  // Exported menu link: devel_clear-cache:devel/cache/clear
-  $menu_links['devel_clear-cache:devel/cache/clear'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/cache/clear',
-    'router_path' => 'devel/cache/clear',
-    'link_title' => 'Clear cache',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'Clear the CSS cache and all database cache tables which store page, node, theme and variable caches.',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'devel_clear-cache:devel/cache/clear',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_devel-settings:devel/settings
-  $menu_links['devel_devel-settings:devel/settings'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/settings',
-    'router_path' => 'devel/settings',
-    'link_title' => 'Devel settings',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the <a href="/admin/structure/block">block administration</a> page.',
-      ),
-      'identifier' => 'devel_devel-settings:devel/settings',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_entity-info:devel/entity/info
-  $menu_links['devel_entity-info:devel/entity/info'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/entity/info',
-    'router_path' => 'devel/entity/info',
-    'link_title' => 'Entity info',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'View entity information across the whole site.',
-      ),
-      'identifier' => 'devel_entity-info:devel/entity/info',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_field-info:devel/field/info
-  $menu_links['devel_field-info:devel/field/info'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/field/info',
-    'router_path' => 'devel/field/info',
-    'link_title' => 'Field info',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'View fields information across the whole site.',
-      ),
-      'identifier' => 'devel_field-info:devel/field/info',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_function-reference:devel/reference
-  $menu_links['devel_function-reference:devel/reference'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/reference',
-    'router_path' => 'devel/reference',
-    'link_title' => 'Function reference',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'View a list of currently defined user functions with documentation links.',
-      ),
-      'identifier' => 'devel_function-reference:devel/reference',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_hookelements:devel/elements
-  $menu_links['devel_hookelements:devel/elements'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/elements',
-    'router_path' => 'devel/elements',
-    'link_title' => 'Hook_elements()',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'View the active form/render elements for this site.',
-      ),
-      'identifier' => 'devel_hookelements:devel/elements',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_menu-item:devel/menu/item
-  $menu_links['devel_menu-item:devel/menu/item'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/menu/item',
-    'router_path' => 'devel/menu/item',
-    'link_title' => 'Menu item',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'Details about a given menu item.',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'devel_menu-item:devel/menu/item',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_phpinfo:devel/phpinfo
-  $menu_links['devel_phpinfo:devel/phpinfo'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/phpinfo',
-    'router_path' => 'devel/phpinfo',
-    'link_title' => 'PHPinfo()',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'View your server\'s PHP configuration',
-      ),
-      'identifier' => 'devel_phpinfo:devel/phpinfo',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_rebuild-menus:devel/menu/reset
-  $menu_links['devel_rebuild-menus:devel/menu/reset'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/menu/reset',
-    'router_path' => 'devel/menu/reset',
-    'link_title' => 'Rebuild menus',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'Rebuild menu based on hook_menu() and revert any custom changes. All menu items return to their default settings.',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'devel_rebuild-menus:devel/menu/reset',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_reinstall-modules:devel/reinstall
-  $menu_links['devel_reinstall-modules:devel/reinstall'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/reinstall',
-    'router_path' => 'devel/reinstall',
-    'link_title' => 'Reinstall modules',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'Run hook_uninstall() and then hook_install() for a given module.',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'devel_reinstall-modules:devel/reinstall',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_run-cron:devel/run-cron
-  $menu_links['devel_run-cron:devel/run-cron'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/run-cron',
-    'router_path' => 'devel/run-cron',
-    'link_title' => 'Run cron',
-    'options' => array(
-      'identifier' => 'devel_run-cron:devel/run-cron',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_session-viewer:devel/session
-  $menu_links['devel_session-viewer:devel/session'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/session',
-    'router_path' => 'devel/session',
-    'link_title' => 'Session viewer',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'List the contents of $_SESSION.',
-      ),
-      'identifier' => 'devel_session-viewer:devel/session',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_theme-registry:devel/theme/registry
-  $menu_links['devel_theme-registry:devel/theme/registry'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/theme/registry',
-    'router_path' => 'devel/theme/registry',
-    'link_title' => 'Theme registry',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'View a list of available theme functions across the whole site.',
-      ),
-      'identifier' => 'devel_theme-registry:devel/theme/registry',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
-  // Exported menu link: devel_variable-editor:devel/variable
-  $menu_links['devel_variable-editor:devel/variable'] = array(
-    'menu_name' => 'devel',
-    'link_path' => 'devel/variable',
-    'router_path' => 'devel/variable',
-    'link_title' => 'Variable editor',
-    'options' => array(
-      'attributes' => array(
-        'title' => 'Edit and delete site variables.',
-      ),
-      'alter' => TRUE,
-      'identifier' => 'devel_variable-editor:devel/variable',
-    ),
-    'module' => 'system',
-    'hidden' => 0,
-    'external' => 0,
-    'has_children' => 0,
-    'expanded' => 0,
-    'weight' => 0,
-    'customized' => 0,
-  );
   // Exported menu link: main-menu_find:schemes
   $menu_links['main-menu_find:schemes'] = array(
     'menu_name' => 'main-menu',
@@ -3742,7 +3460,6 @@ function asb_features_menu_default_menu_links() {
   t('Chosen');
   t('CiviCRM');
   t('Clean URLs');
-  t('Clear cache');
   t('Comments');
   t('Compose tips');
   t('Configuration');
@@ -3763,7 +3480,6 @@ function asb_features_menu_default_menu_links() {
   t('Devel settings');
   t('Development');
   t('Document');
-  t('Entity info');
   t('Event');
   t('FAQ');
   t('Facebook');
@@ -3775,20 +3491,17 @@ function asb_features_menu_default_menu_links() {
   t('Feeds log');
   t('Fences');
   t('Field dependencies');
-  t('Field info');
   t('Field list');
   t('File system');
   t('File types');
   t('Find');
   t('Flags');
   t('Follow @ActionSwitchBrd');
-  t('Function reference');
   t('Global Redirect');
   t('Goal');
   t('Help');
   t('Hierarchical Select');
   t('Home');
-  t('Hook_elements()');
   t('IP address blocking');
   t('Image styles');
   t('Image toolkit');
@@ -3805,7 +3518,6 @@ function asb_features_menu_default_menu_links() {
   t('Media');
   t('Media browser settings');
   t('Menu block');
-  t('Menu item');
   t('Menus');
   t('Message settings');
   t('Message subscribe settings');
@@ -3828,31 +3540,26 @@ function asb_features_menu_default_menu_links() {
   t('OG settings');
   t('OWSTech Share');
   t('Organic groups');
-  t('PHPinfo()');
   t('Pages');
   t('People');
   t('Performance');
   t('Private message settings');
   t('Quicktabs');
   t('RSS publishing');
-  t('Rebuild menus');
   t('Rebuild type information for media');
   t('Recent hits');
   t('Recent log messages');
   t('Recommend a new goal');
   t('Regional and language');
   t('Regional settings');
-  t('Reinstall modules');
   t('Reported abuse');
   t('Reports');
   t('Resources');
   t('Rules');
-  t('Run cron');
   t('Scheme');
   t('Search');
   t('Search and metadata');
   t('Search settings');
-  t('Session viewer');
   t('Shortcuts');
   t('Site information');
   t('Social Links');
@@ -3866,7 +3573,6 @@ function asb_features_menu_default_menu_links() {
   t('Text formats');
   t('The Cookbook');
   t('The Yes Lab');
-  t('Theme registry');
   t('Top \'access denied\' errors');
   t('Top \'page not found\' errors');
   t('Top pages');
@@ -3880,7 +3586,6 @@ function asb_features_menu_default_menu_links() {
   t('User account');
   t('User interface');
   t('User menu');
-  t('Variable editor');
   t('Views');
   t('Views plugins');
   t('Web services');
