@@ -1305,7 +1305,9 @@ function asb_scheme_mail($key, &$message, $params) {
     case 'facilitator': 
       $message['subject'] = $params['context']['subject'];
       $message['body'][] = $params['context']['body'];
-      $message['body'][] = $params['context']['plaintext'];
+      if(isset($params['context']['plaintext'])) {
+        $message['body'][] = $params['context']['plaintext'];
+      }
       break;
   }
 }
