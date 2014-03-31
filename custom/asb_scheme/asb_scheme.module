@@ -6,13 +6,27 @@ function asb_scheme_init() {
       // '{$module}_{$key}' => 'MimeMailSystem', // Just messages with $key sent by $module.
     'asb_scheme' => 'MimeMailSystem', // All messages sent by $module.
   ));
-  asb_scheme_remove_extra_leaders();
-
+  // Add modal js
+  drupal_add_js(array(
+      'asb-scheme-modal' => array(
+        'modalSize' => array(
+          'type' => 'scale',
+          'width' => .50,
+          'height' => .50,
+          'addWidth' => 20,
+          'addHeight' => 30,
+          'contentRight' => 10,
+          'contentBottom' => 10,
+        ),
+        'animation' => 'fadeIn',
+      ),
+    ), 'setting');
 }
 
 function asb_scheme_cron() {
   // asb_scheme_civicrm_api();
   _asb_scheme_update_skills();
+  asb_scheme_remove_extra_leaders();
 }
 
 /**
@@ -1035,7 +1049,7 @@ function asb_scheme_views_post_render(&$view, &$output, &$cache) {
           // $link_markup .= 'group/node/' .$gid['gid'] .'/subscribe/og_user_node">Donate Skills</a></div>';
           $donate_link = 'asb-modal/group/node/' .$gid['gid'] .'/subscribe/og_user_node/nojs/donate';
           $link_markup = '<div class="donate-button">';
-          $link_markup .= ctools_modal_text_button('Donate Skills', $donate_link, t('Donate Skills'), 'ctools-use_modal');
+          $link_markup .= ctools_modal_text_button('Donate Skills', $donate_link, t('Donate Skills'), 'ctools-use_modal ctools-modal-asb-scheme-modal');
           $link_markup .= '</div>';
         }else{
           $link_markup = '<a class="ctools-use-modal ctools-modal-modal-popup-small" href="/modal_forms/nojs/login">Donate Skills</a>';

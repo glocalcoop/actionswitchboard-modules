@@ -327,7 +327,7 @@ function asb_modal_process_format($element) {
  * Implements hook_wysiwyg_editor_settings_alter()
  **/
 function asb_modal_wysiwyg_editor_settings_alter(&$settings, $context) {
-  if(arg(1) == 'ajax') {
+  if(arg(1) == 'ajax' || arg(6) == 'ajax') {
     if ($context['profile']->editor == 'ckeditor' && isset($settings['height'])) {
       $settings['height'] = 150;
     }
