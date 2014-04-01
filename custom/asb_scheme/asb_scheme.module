@@ -87,7 +87,10 @@ function asb_scheme_preprocess_node(&$vars) {
 
 
 function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  global $user;
+  $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
   // Add a tab linking to ajax loading tab on scheme pages
+  
   if(arg(0) == 'node' && is_numeric(arg(1))) {
     $node = node_load(arg(1));
     if($node->type == 'scheme'
@@ -124,6 +127,15 @@ function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
       $count = count($data['tabs'][0]['output']);
       if(isset($date['tabs'][0]['count'])) {
         $data['tabs'][0]['count'] == $count;
+      }
+      // Remove extra tabs if scheme is in Needs Review state
+    }elseif($node->type == 'scheme' 
+      && $node->workflow_state_name == 'Needs Review'
+      && $check == FALSE) {
+      foreach($data['tabs'][0]['output'] as $key => $value) {
+        if($key > 1) {
+          unset($data['tabs'][0]['output'][$key]);
+        }
       }
     }
   }
