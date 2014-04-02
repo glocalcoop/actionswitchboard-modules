@@ -22,9 +22,10 @@ function asb_issues_form_alter(&$form, &$form_state, $form_id) {
       'callback' => 'asb_issues_goals_ajax_callback',
       'method' => 'replace',
     );
-    if($form_id == 'scheme_node_form') {
-      $form['field_issues_goals']['#suffix'] = '<div class="goal-rec"><a class="ui-button" href="/node/add/goal" target="_blank">Recommend Your Own Goal</a></div>';
-    }
+    // Add a recommend a goal link on scheme_node_form
+    /* if($form_id == 'scheme_node_form') { */
+    /*   $form['field_issues_goals']['#suffix'] = '<div class="goal-rec"><a class="ui-button" href="/node/add/goal" target="_blank">Recommend Your Own Goal</a></div>'; */
+    /* } */
     // Add a wrapper for the correct field to change
     $form['field_scheme_goals_taxonomy']['und']['#prefix'] = '<div id="parent-goal-wrapper">';
     $form['field_scheme_goals_taxonomy']['und']['#suffix'] = '</div>';
