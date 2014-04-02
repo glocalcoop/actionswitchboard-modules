@@ -923,6 +923,16 @@ function asb_scheme_node_view($node, $view_mode, $langcode){
 }
 
 /**
+ * Implements hook_node_access();
+ */
+/* function abs_scheme_node_access($node, $op, $account) { */
+/*   return TRUE; */
+/*   if($op == 'view') { */
+/*     return NODE_ACCESS_ALLOW; */
+/*   } */
+/* } */
+
+/**
  * Format issues and goals for a scheme.
  */
 function asb_scheme_format_issues_goals($node) {
@@ -1135,7 +1145,11 @@ function asb_scheme_funds_raised($node = NULL) {
     $pcp_donated = CRM_Core_DAO::singleValueQuery( $pcp_query2 );
     $goal = $pcp_donated;
     // Subtract amount raised from goal amount and format
-    $raised = number_format($goal - $raised);
+    if($goal > $raised) {
+      $raised = number_format($goal - $raised);
+    }else{
+      $raised = 0;
+    }
   }else{
     $raised = "0";
   }
