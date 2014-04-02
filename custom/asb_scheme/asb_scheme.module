@@ -377,11 +377,19 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       '#options' => $skills,
     );
     (!isset($form_state['message_type'])) ? $form_state['message_type'] = arg(7) : TRUE;
+    $state = og_is_member('node', $scheme->nid, 'user', $user, array(OG_STATE_PENDING));
     if($form_state['message_type'] == 'donate') {
+      if($state == 1) {
+        $type = 'hidden';
+        $default_value = 0;
+      }else{
+        $type = 'checkbox';
+        $default_value = 1;
+      }
       $form['privatemsg']['join'] = array(
         '#title' => t('Check this box to join the scheme.'),
-        '#type' => 'checkbox',
-        '#default_value' => 1,
+        '#type' => $type,
+        '#default_value' => $default_value,
       );
       $form['actions']['submit']['#value'] = 'Send Message';
     }else{
