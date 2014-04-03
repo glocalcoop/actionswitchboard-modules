@@ -931,39 +931,6 @@ function asb_scheme_node_view($node, $view_mode, $langcode){
   }
 }
 
-/* function asb_scheme_node_access($node, $op, $account) { */
-/*   return NODE_ACCESS_IGNORE; */
-/* } */
-
-/* function asb_scheme_node_grants($account, $op) { */
-/*   dsm('Hi dad'); */
-/*   dsm($account); */
-/*   dsm($op); */
-/*   $grants['example'] = array($account->uid); */
-/*   return $grants; */
-/* } */
-
-/* function asb_scheme_node_grants_alter(&$grants, $account, $op) { */
-/*   dsm('Hi mom'); */
-/*   dsm($account); */
-/*   dsm($op); */
-/*   // $grants = array(); */
-/*   unset($grants['workflow_access']); */
-/*   unset($grants['workflow_access_owner']); */
-/*   dsm($grants); */
-/*   return $grants; */
-/* } */
-
-/**
- * Implements hook_node_access();
- */
-/* function abs_scheme_node_access($node, $op, $account) { */
-/*   return TRUE; */
-/*   if($op == 'view') { */
-/*     return NODE_ACCESS_ALLOW; */
-/*   } */
-/* } */
-
 /**
  * Format issues and goals for a scheme.
  */

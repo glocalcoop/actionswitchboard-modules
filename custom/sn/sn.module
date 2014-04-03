@@ -20,9 +20,9 @@ function sn_node_insert($node) {
   $message = message_create('group_content');
   $wrapper = entity_metadata_wrapper('message', $message);
   if($node->type == 'scheme') {
-  $wrapper->field_og_ref->set($node->nid);
-  }else{
-  $wrappeer->field_og_ref->set($node->og_group_ref['und'][0]['target_id']);
+    $wrapper->field_og_ref->set($node->nid);
+  }elseif ($node->type != 'goal'){
+    $wrapper->field_og_ref->set($node->og_group_ref['und'][0]['target_id']);
   }
   $wrapper->field_node_ref_with_og->set($node->nid);
   $options = array(
@@ -35,5 +35,4 @@ function sn_node_insert($node) {
     'subscribe message' => FALSE,
     'email message' => TRUE,
   );
-  message_subscribe_send_message('node', $node, $message, array('email' => $options), $subscribe_options);
 }
