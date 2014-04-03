@@ -336,7 +336,7 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
     $form['og_user']['#title'] = t('Add a new schemer');
     $form['return'] = array(
       '#markup' => '<div class="ui-button back-scheme"><a href="/node/' .$form['gid']['#value'] .
-      '/group title="Back to Scheme">Back to Scheme</a></div>',
+      '/group" title="Back to Scheme">Back to Scheme</a></div>',
       '#weight' => -1,
     );
     $form['actions']['submit']['#value'] = "Add User";
@@ -434,6 +434,21 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
     if(isset($form['sid'])) {
       foreach($form['sid']['#options'] as $key => $value) {
         $form['sid']['#options'][$key] = str_replace('Scheme Creation: ', '', $form['sid']['#options'][$key]);
+      }
+    }
+  }
+  if($form_id == 'views_form_og_members_admin_default') {
+    $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
+    if($check != TRUE) {
+      foreach($form['add_roles']['#options'] as $key => $value) {
+        if($value == 'Scheme Leader') {
+          unset($form['add_roles']['#options'][$key]);
+        }
+      }
+      foreach($form['remove_roles']['#options'] as $key => $value) {
+        if($value == 'Scheme Leader') {
+          unset($form['remove_roles']['#options'][$key]);
+        }
       }
     }
   }
