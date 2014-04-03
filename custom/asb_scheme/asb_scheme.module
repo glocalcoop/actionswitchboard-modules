@@ -21,6 +21,7 @@ function asb_scheme_init() {
         'animation' => 'fadeIn',
       ),
     ), 'setting');
+  
 }
 
 function asb_scheme_cron() {
@@ -930,6 +931,29 @@ function asb_scheme_node_view($node, $view_mode, $langcode){
   }
 }
 
+/* function asb_scheme_node_access($node, $op, $account) { */
+/*   return NODE_ACCESS_IGNORE; */
+/* } */
+
+/* function asb_scheme_node_grants($account, $op) { */
+/*   dsm('Hi dad'); */
+/*   dsm($account); */
+/*   dsm($op); */
+/*   $grants['example'] = array($account->uid); */
+/*   return $grants; */
+/* } */
+
+/* function asb_scheme_node_grants_alter(&$grants, $account, $op) { */
+/*   dsm('Hi mom'); */
+/*   dsm($account); */
+/*   dsm($op); */
+/*   // $grants = array(); */
+/*   unset($grants['workflow_access']); */
+/*   unset($grants['workflow_access_owner']); */
+/*   dsm($grants); */
+/*   return $grants; */
+/* } */
+
 /**
  * Implements hook_node_access();
  */
@@ -1771,7 +1795,7 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
             // Assemble the parameters to send to add function
             $pcp_params = array(
               'title' => $project['values'][$contact_id]['display_name'],
-              'intro_text' => $project['values'][$contact_id]['custom_106'],
+              'intro_text' => "", //$project['values'][$contact_id]['custom_106'],
               'goal_amount' => $project['values'][$contact_id]['custom_107'] > 0 ? $project['values'][$contact_id]['custom_107'] : '100.00',
               'donate_link_text' => 'Donate Now',
               'page_text' => "If this scheme has already reached its funding goal, any additional funds will be offered to make the scheme even more successful, or support a scheme with similar goals.",
@@ -1801,7 +1825,7 @@ function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
             $pcp_params = array(
               'id' => $pcp_id,
               'title' => $project['values'][$contact_id]['display_name'],
-              'intro_text' => $project['values'][$contact_id]['custom_106'],
+              'intro_text' => "",// $project['values'][$contact_id]['custom_106'],
               'goal_amount' => $project['values'][$contact_id]['custom_107'] > 0 ? $project['values'][$contact_id]['custom_107'] : '100.00',
               'donate_link_text' => 'Donate Now',
               'page_text' => "If this scheme has already reached its funding goal, any additional funds will be offered to make the scheme even more successful, or support a scheme with similar goals.",
