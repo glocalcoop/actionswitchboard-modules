@@ -24,6 +24,7 @@ function sn_node_insert($node) {
   }elseif ($node->type != 'goal'){
     $wrapper->field_og_ref->set($node->og_group_ref['und'][0]['target_id']);
   }
+  $wrapper->field_node_ref_with_og->set($node->nid);
   $options = array(
     'rendered fields' => array(
       'message_notify_email_subject' => 'field_rendered_og_subject',
