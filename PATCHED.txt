@@ -10,11 +10,6 @@ Chosen:
 Patched chosen.js
 Needed to exclude it for certain fields
 
-Location::Location_CCK:
-https://drupal.org/node/2119967#comment-8149785
-Throwing tons of notice errors of undefined index.  Actually patched
-this manually, not with the listed patch.
-
 Views:
 https://drupal.org/node/1511396
 Throwing array to string conversion notices.
