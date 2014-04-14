@@ -1352,13 +1352,17 @@ function asb_scheme_mail($key, &$message, $params) {
         $message['body'][] = $params['context']['plaintext'];
       }
       break;
+    case 'reminder':
+      $message['subject'] = $params['context']['subject'];
+      $message['body'][] = $params['context']['body'];
+      break;
   }
 }
       
 /**
  * Notifies facilitators of unchanged schemes.
  */
-function asb_scheme_remind_facilitator_action(&$entity, $context = array()) {
+function asb_scheme_remind_facilitator_action(&$entity, $context) {
   global $base_url;
   if(date("D h",time()) == "Mon 08") {
     $sql = "SELECT node.title, workflow_node.nid, field_facilitator_target_id AS fftid, users.mail 
@@ -1392,14 +1396,16 @@ function asb_scheme_remind_facilitator_action(&$entity, $context = array()) {
 
       // Now, actually send the mails.
       $params = array(
-        'subject' => 'Schemers need you!',
-        'message' => $facs[$key]['message'],
+        'context' => array(
+          'subject' => 'Schemers need you!',
+          'body' => $facs[$key]['message'],
+        ),
       );
       $from = variable_get('site_mail', ini_get('sendmail_from'));
       $mail_key = 'reminder';
       $message = array('result' => TRUE);
       $message = drupal_mail('asb_scheme', $mail_key, $key, language_default(), $params, $from);
-      watchdog('action', 'Sent facilitator reminder to %email', array('%email' => $key));
+      watchdog('action', 'Sent facilitator reminder to %email with message %message', array('%email' => $key, '%message' => $facs[$key]['message']));
       if (!$message['result']) {
         break;
       }
