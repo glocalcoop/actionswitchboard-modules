@@ -1670,6 +1670,8 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL, $par
     }
   }elseif($type == 'tag_add') {
     $result = civicrm_api('EntityTag', 'create', $params);
+    print "params from scheme \n";
+    print_r($params);
     return $result;
   }elseif($type == 'tag_remove') {
     $result = civicrm_api('EntityTag', 'delete', $params);
