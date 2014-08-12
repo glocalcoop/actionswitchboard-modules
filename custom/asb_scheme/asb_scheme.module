@@ -77,7 +77,7 @@ function asb_scheme_preprocess_node(&$vars) {
     if(isset($flags['subscribe_og'])) {
       $vars['fans'] = $flags['subscribe_og'];
     }else{
-      $vars['fans'] = 69;
+      $vars['fans'] = 0;
     }
     // Get og membership for the scheme
     $members = og_membership_load_multiple(FALSE, array('gid' => $vars['nid'], 'entity_type' => 'user'));
