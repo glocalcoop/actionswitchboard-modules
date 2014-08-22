@@ -94,6 +94,7 @@ function asb_message_node_insert($node) {
   $facilitator = asb_message_get_facilitator($nids);
   $message = message_create('update_posted_in_scheme', array('arguments' => $arguments, 'uid' => $node->uid));
   $wrapper = entity_metadata_wrapper('message', $message);
+  // dsm($wrapper);
   $wrapper->field_node_ref->set($node);
   $wrapper->field_node_groups_ref->set($nids);
   $wrapper->field_published->set($node->status);
