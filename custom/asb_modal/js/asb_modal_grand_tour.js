@@ -54,8 +54,8 @@
         slideExpr: '.field-image',
         containerResize: 1,
         fit: 1,
-        height: '187px',
-        width: '325px',
+        height: '360px',
+        width: '640px',
       });      
     }
   }

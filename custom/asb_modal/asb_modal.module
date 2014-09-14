@@ -231,8 +231,8 @@ function asb_modal_gt_settings() {
     'asb-modal-gt' => array(
       'modalSize' => array(
         'type' => 'fixed',
-        'width' => 325,
-        'height' => 187,
+        'width' => 640,
+        'height' => 360,
         'addWidth' => 20,
         'addHeight' => 30,
         'contentRight' => 10,
