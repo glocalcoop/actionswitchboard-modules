@@ -47,7 +47,7 @@
         fx:    'scrollHorz',
         speed:  1000, 
         timeout: 10000,
-        pause: 1, /1/ pause on hover
+        pause: 1, // pause on hover
         slideExpr: '.field-image',
         containerResize: 1,
         // fit: 1, // Commented out b/c it interferes with animations.
