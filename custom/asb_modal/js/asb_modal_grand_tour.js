@@ -48,8 +48,8 @@
       });
       $('.view-grand-tour .view-content .views-row').cycle({
         fx:    'scrollLeft',
-        speed:  3000, 
-        timeout: 4000,
+        speed:  4000, 
+        timeout: 6000,
         pause: 1, // pause on hover
         slideExpr: '.field-image',
         containerResize: 1,
