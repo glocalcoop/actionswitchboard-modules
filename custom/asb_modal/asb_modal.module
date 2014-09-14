@@ -219,7 +219,7 @@ function asb_modal_views_pre_view(&$view, &$display_id, &$args) {
     }
   }
   if($view->name == 'grand_tour') {
-    asb_modal_gt_settings();
+    // asb_modal_gt_settings();
   }
 }
 
