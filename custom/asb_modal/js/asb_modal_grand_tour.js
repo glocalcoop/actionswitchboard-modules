@@ -42,6 +42,8 @@
       $('.views-field-title .field-content').remove();
       var images = $('.view-grand-tour .view-content .views-row img')
       $.each( images, function( i, val ) {
+        $(this).parent().append('<h4 class="article-title index-' + i + '" style="z-index: 1000;">' + title + '</h4>')
+        
         $(this).parent().append('<span class="img-title" style="z-index: 1000;">' + $(this).attr('title') + '</span>')
       });
       $('.view-grand-tour .view-content .views-row').cycle({
