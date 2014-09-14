@@ -48,7 +48,7 @@
       });
       $('.view-grand-tour .view-content .views-row').cycle({
         fx:    'fade',
-        speed:  450, 
+        speed:  2000, 
         timeout: 4000,
         pause: 1, // pause on hover
         slideExpr: '.field-image',
