@@ -5,7 +5,8 @@
  */
 function asb_modal_init() {
   // Borrow from modal_forms
-    _modal_forms_doheader();
+  _modal_forms_doheader();
+  asb_modal_gt_settings();
 }
 
 
@@ -52,8 +53,39 @@ function asb_modal_menu() {
     'file' => 'asb_modal.pages.inc',
     'type' => MENU_CALLBACK,
   );
+  $items['asb-modal/%ctools_js/grand-tour'] = array(
+    'page callback' => 'asb_modal_grand_tour_callback',
+    'page arguments' => array(1),
+    'access arguments' => array('access content'),
+    // 'file' => 'asb_modal.pages.inc',
+    'type' => MENU_CALLBACK,
+  );
+
   return $items;
 }
+
+function asb_modal_grand_tour_callback($js = false, $type = 'grand_tour', $gid = NULL) {
+  // If the user doesn't have javascript, redirect them to the home page
+  if ($js) {
+    // Javascript is on, prepare ctools modals.
+    /* ctools_include('ajax'); */
+    /* ctools_include('modal'); */
+    // Add scheme_members_modals display
+    $view_name = 'grand_tour';
+    $display_name = 'block_1';
+    $view = views_get_view($view_name);
+    if ( is_object($view) ) {
+      $view->set_display($display_name);
+      $view->set_arguments(array($gid));
+      $view->pre_execute();
+      $contents = $view->render($display_name);
+    }
+    return ctools_modal_render('Grand Tour', $contents);
+    exit;
+  }else{
+    drupal_goto('/');
+  }
+} 
 
 /**
  * Implements hook_form_alter()
@@ -184,52 +216,91 @@ function asb_modal_views_pre_view(&$view, &$display_id, &$args) {
       $view->display_handler->set_option('header', array('text' => $options));
     }
   }
+  if($view->name == 'grand_tour') {
+    asb_modal_gt_settings();
+  }
+}
+
+function asb_modal_gt_settings() {
+  ctools_include('modal');
+  ctools_include('ajax');
+  // ctools_modal_add_js();
+  $asb_style = array(
+    'asb-modal-gt' => array(
+      'modalSize' => array(
+        'type' => 'fixed',
+        'width' => 325,
+        'height' => 187,
+        'addWidth' => 20,
+        'addHeight' => 30,
+        'contentRight' => 10,
+        'contentBottom' => 10,
+      ),
+      'modalOptions' => array(
+        'opacity' => .6,
+        'background-color' => '#684C31',
+      ),
+      'animation' => 'fadeIn',
+      'modalTheme' => 'asb_modal_gt',
+      // Customize the AJAX throbber like so:
+      // This function assumes the images are inside the module directory's "images"
+      // directory:
+      // ctools_image_path($image, $module = 'ctools', $dir = 'images')
+      'throbber' => theme('image', array('path' => ctools_image_path('ajax-loader.gif', 'asb_modal'), 'alt' => t('Loading...'), 'title' => t('Loading'))),
+    ),
+  );
+
+  // Add the settings array defined above to Drupal 7's JS settings:
+  drupal_add_js($asb_style, 'setting');
+  ctools_add_js('asb_modal_grand_tour', 'asb_modal');
+  ctools_add_js('asb_modal_gt', 'asb_modal');
+  ctools_add_css('asb_modal_gt', 'asb_modal');
 }
 
 function asb_modal_settings($gid, $node_types = array()) {
-    ctools_include('modal');
-    ctools_include('ajax');
-    ctools_modal_add_js();
-
-    $asb_style = array(
-      'asb-modal-style' => array(
-        'modalSize' => array(
-          'type' => 'scale',
-          'width' => .50,
-          'height' => .50,
-          'addWidth' => 20,
-          'addHeight' => 30,
-          'contentRight' => 10,
-          'contentBottom' => 10,
-        ),
-        'modalOptions' => array(
-          'opacity' => .6,
-          'background-color' => '#684C31',
-        ),
-        'animation' => 'fadeIn',
-        'modalTheme' => 'asb_modal',
-        // Customize the AJAX throbber like so:
-        // This function assumes the images are inside the module directory's "images"
-        // directory:
-        // ctools_image_path($image, $module = 'ctools', $dir = 'images')
-        'throbber' => theme('image', array('path' => ctools_image_path('ajax-loader.gif', 'asb_modal'), 'alt' => t('Loading...'), 'title' => t('Loading'))),
+  ctools_include('modal');
+  ctools_include('ajax');
+  ctools_modal_add_js();
+  $asb_style = array(
+    'asb-modal-style' => array(
+      'modalSize' => array(
+        'type' => 'scale',
+        'width' => .50,
+        'height' => .50,
+        'addWidth' => 20,
+        'addHeight' => 30,
+        'contentRight' => 10,
+        'contentBottom' => 10,
       ),
-    );
-    // Add the settings array defined above to Drupal 7's JS settings:
-    drupal_add_js($asb_style, 'setting');
-    drupal_add_js(array('asb_modal' => array('types' => $node_types)), 'setting');
-    ctools_add_js('asb_modal', 'asb_modal');
+      'modalOptions' => array(
+        'opacity' => .6,
+        'background-color' => '#684C31',
+      ),
+      'animation' => 'fadeIn',
+      'modalTheme' => 'asb_modal',
+      // Customize the AJAX throbber like so:
+      // This function assumes the images are inside the module directory's "images"
+      // directory:
+      // ctools_image_path($image, $module = 'ctools', $dir = 'images')
+      'throbber' => theme('image', array('path' => ctools_image_path('ajax-loader.gif', 'asb_modal'), 'alt' => t('Loading...'), 'title' => t('Loading'))),
+    ),
+  );
 
-    ctools_add_css('asb_modal', 'asb_modal');
-    // $group = og_context();
-    $links = array();
-    foreach($node_types as $key => $type) {
-      if(og_user_access('node', $gid, "create $type content")) {
-        $links[] = ctools_modal_text_button(t('Add ' .ucfirst($type)),'asb-modal-callback/nojs/' .$type .'/' .$gid, t('Add ' .ucfirst($type)), 'ctools-modal-asb-modal-style node-add add-' .$type);
-      }
+  // Add the settings array defined above to Drupal 7's JS settings:
+  drupal_add_js($asb_style, 'setting');
+  drupal_add_js(array('asb_modal' => array('types' => $node_types)), 'setting');
+  ctools_add_js('asb_modal', 'asb_modal');
+
+  ctools_add_css('asb_modal', 'asb_modal');
+  // $group = og_context();
+  $links = array();
+  foreach($node_types as $key => $type) {
+    if(og_user_access('node', $gid, "create $type content")) {
+      $links[] = ctools_modal_text_button(t('Add ' .ucfirst($type)),'asb-modal-callback/nojs/' .$type .'/' .$gid, t('Add ' .ucfirst($type)), 'ctools-modal-asb-modal-style node-add add-' .$type);
     }
-    $output =  theme('item_list', array('items' => $links));
-    return $output;
+  }
+  $output =  theme('item_list', array('items' => $links));
+  return $output;
 }
 
 /**

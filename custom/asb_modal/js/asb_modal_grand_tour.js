@@ -25,23 +25,36 @@
  * for the JavaScript code in this page.
  *
  */
+
+/**
+ *
+ * Handle the cycling of images in the grand tour.
+ */
 (function($) {
-  Drupal.behaviors.asbModal = {
+
+  Drupal.behaviors.asbGrandTour = {
     attach: function(context, settings) {
-      $('.modal-update-title').hide();
-      $('ul.primary li.ctools-use-ajax a.use-ajax').click(function() {
-        $('ul.primary a.active').removeClass('active');
-        $(this).addClass('active');
+      $('#modalContent').animate({ "top": "95px", "left": "88px" }, "slow");
+      console.log(context);
+      console.log(settings);
+      var title = $('.views-field-title .field-content').html();
+      console.log(title);
+      $('.views-field-title .field-content').remove();
+      var images = $('.view-grand-tour .view-content .views-row img')
+      $.each( images, function( i, val ) {
+        $(this).parent().append('<span class="img-title" style="z-index: 1000;">' + $(this).attr('title') + '</span>')
       });
-      $('#modalContent').ajaxComplete(function() {
-        var nodeId = $('form.node-form').attr('id');
-        // var nodeId = 'update-node-form';
-        var nodeType = nodeId.split('-');
-        var typeUp = nodeType[0].substr(0,1).toUpperCase()+nodeType[0].substr(1);
-        $('.modal-update-title').html('Add ' + typeUp);
-        $('.modal-update-title').show();
-      });
+      $('.view-grand-tour .view-content .views-row').cycle({
+        fx:    'fade',
+        speed:  450, 
+        timeout: 4000,
+        pause: 1, // pause on hover
+        slideExpr: '.field-image',
+        containerResize: 1,
+        fit: 1,
+        height: '187px',
+        width: '325px',
+      });      
     }
   }
 })(jQuery);
-

@@ -30,10 +30,10 @@
 */
 (function ($) {
 
-  Drupal.theme.prototype.asb_modal = function () {
+  Drupal.theme.prototype.asb_modal_gt = function () {
     var html = '';
     html += '<div id="ctools-modal" class="popups-box">';
-    html += '   <div class="ctools-modal-content ctools-modal-asb-modal-update">';
+    html += '   <div class="ctools-modal-content ctools-modal-asb-modal-gt">';
     html += '       <div class="modal-content-wrapper">'
     html += '           <header class="modal-head-wrapper">';
     html += '               <span class="modal-update-title" style="display:none;">Add Update</span>';
@@ -45,27 +45,4 @@
     html += '</div>';
     return html;
   }
-
-   // Drupal.behaviors.asb_modal = {
-   //  attach: function( context, settings ){
-   //      console.log("ASB MODAL!!!")
-   //      $("input[id*='remove-button']", context).once( function(){
-   //        console.log("looking for remove-button inputs");
-   //        var ri = $(this);
-   //        var rb = $('<a class="icon delete" href="#"><span>Delete</span></a>' );
-   //        //ri.css('display','none');
-   //        rb.insertAfter( ri );
-   //        console.log( ri.form );
-   //        // rb.click( clickHandler );
-   //        rb.click( function(e){
-   //          console.log( this.form );
-   //          console.log( ri.data );
-   //          console.log( ri.data("events").click );
-   //          ri.click();
-   //          e.preventDefault();
-   //        });
-   //      });
-   //  }
-   // }
-
 })(jQuery);
