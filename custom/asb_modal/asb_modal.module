@@ -233,7 +233,7 @@ function asb_modal_gt_settings() {
         'type' => 'fixed',
         'width' => 640,
         'height' => 360,
-        'addWidth' => 20,
+        'addWidth' => 100,
         'addHeight' => 30,
         'contentRight' => 10,
         'contentBottom' => 10,
