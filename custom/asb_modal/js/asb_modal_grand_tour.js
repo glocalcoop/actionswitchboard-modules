@@ -47,8 +47,8 @@
         $(this).parent().append('<span class="img-title" style="z-index: 1000;">' + $(this).attr('title') + '</span>')
       });
       $('.view-grand-tour .view-content .views-row').cycle({
-        fx:    'fade',
-        speed:  2000, 
+        fx:    'scrollLeft',
+        speed:  3000, 
         timeout: 4000,
         pause: 1, // pause on hover
         slideExpr: '.field-image',
