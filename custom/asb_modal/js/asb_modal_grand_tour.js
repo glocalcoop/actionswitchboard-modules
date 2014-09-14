@@ -34,11 +34,8 @@
 
   Drupal.behaviors.asbGrandTour = {
     attach: function(context, settings) {
-      $('#modalContent').animate({ "top": "95px", "left": "88px" }, "slow");
-      console.log(context);
-      console.log(settings);
+      // $('#modalContent').animate({ "top": "95px", "left": "88px" }, "slow");
       var title = $('.views-field-title .field-content').html();
-      console.log(title);
       $('.views-field-title .field-content').remove();
       var images = $('.view-grand-tour .view-content .views-row img')
       $.each( images, function( i, val ) {
@@ -47,15 +44,17 @@
         $(this).parent().append('<span class="img-title" style="z-index: 1000;">' + $(this).attr('title') + '</span>')
       });
       $('.view-grand-tour .view-content .views-row').cycle({
-        fx:    'scrollLeft',
-        // speed:  1000, 
+        fx:    'scrollHorz',
+        speed:  1000, 
         timeout: 10000,
-        pause: 1, // pause on hover
+        pause: 1, /1/ pause on hover
         slideExpr: '.field-image',
         containerResize: 1,
-        fit: 1,
+        // fit: 1, // Commented out b/c it interferes with animations.
         height: '360px',
         width: '640px',
+        next: '#next1',
+        prev: '#prev1',
       });      
     }
   }
