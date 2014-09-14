@@ -6,7 +6,9 @@
 function asb_modal_init() {
   // Borrow from modal_forms
   _modal_forms_doheader();
-  asb_modal_gt_settings();
+  if(drupal_is_front_page()) {
+    asb_modal_gt_settings();
+  }
 }
 
 
