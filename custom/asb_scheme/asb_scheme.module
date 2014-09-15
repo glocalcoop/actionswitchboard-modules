@@ -187,6 +187,15 @@ function theme_asb_scheme_local_task(&$variables) {
  */
 function asb_scheme_menu() {
   $items = array();
+  $items['admin/config/asb_scheme'] = array(
+    'title' => t('Asb Scheme Civi Settings'),
+    'description' => 'Adjust asb scheme civicrm settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('asb_scheme_admin_settings'),
+    'access arguments' => array('administer CiviCRM'),
+    'file' => 'asb_scheme.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
   $items['asb_scheme/%ctools_js/scheme_content/%/%'] = array(
     'title' => "Updates",
     'page callback' => 'asb_scheme_display_view',
@@ -1267,6 +1276,7 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
     'custom_106' => $body,
     'custom_107' => $funding,
   );
+  // First we create the civi contact for the scheme
   $result = asb_scheme_civicrm_api($type = 'create_contact', 0, $info);
   global $user;
   $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
@@ -1293,6 +1303,57 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
       watchdog('action', 'Added scheme %scheme to civi contacts', array('%scheme' => $info['scheme_name']));
       if(!empty($check)) {
         drupal_set_message("Scheme added to civicrm!", 'status');
+      }
+    }
+
+    // get facilitator civicrm id
+    $fac_cid = asb_scheme_civicrm_api('contact', $ufid = $node->field_facilitator['und'][0]['target_id']);
+    // get scheme contact id from civicrm
+    // get variables for relationships facilitator_relationship schemeleader_relationship
+    // get scheme leader civi contact id
+    $sl_cid = asb_scheme_civicrm_api('contact', $ufid = $node->uid);
+    // build relationships in civcrm to the scheme contact.
+    // Built a set of relationships to the newly created contact.
+    // Use the following array structure
+    /* $params = array( */
+    /*   'relationship_type' => array( */
+    /*     'version' => 3, */
+    /*     'sequential' => 1, */
+    /*     'id' => variable_get('facilitator_relationship'), */
+    /*     'contact_id_a' => 595304, */
+    /*     'contact_id_b' => 594886, */
+    /*   ),
+    /*   'other_relationship_type' => array ETC. */
+    $fac_rel = variable_get('facilitator_relationshi');
+    $sl_rel = variable_get('schemeleader_relationshi');
+    if(!empty($fac_rel) && !empty($sl_rel)) {
+      $params = array(
+        'facilitator' => array(
+          'version' => 3,
+          'sequential' => 1,
+          'relationship_type_id' => $fac_rel,
+          'contact_id_a' => $result['values'][0]['id'],
+          'contact_id_b' => $fac_cid['id'],
+        ),
+        'scheme_leader' => array(
+          'version' => 3,
+          'sequential' => 1,
+          'relationship_type_id' => $sl_rel,
+          'contact_id_a' => $result['values'][0]['id'],
+          'contact_id_b' => $sl_cid['id'],
+        ),
+      );
+      $rel_result = asb_scheme_civicrm_api('relationship', 0, NULL, $params);
+      foreach($rel_result as $type => $res) {
+        if($res != 'complete') {
+          if($res['is_error'] == 0) {
+            watchdog('action', 'Added %relation in civi contacts', array('%relation' => $type));
+            drupal_set_message("Relationship, " .$type ." added to civicrm!");
+          }else{
+            watchdog('error', 'Relationship, %relation with cid %cid, failed to get added to civicrm contacts', array('%relation' => $type, '%cid' => $params[$type]['contact_id_b']));
+            drupal_set_message("Something went wrong.  Relationship not added to civicrm!", 'warning');
+          }
+        }
       }
     }
   }else{
@@ -1670,13 +1731,31 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL, $par
   }elseif($type == 'tag_add') {
     $result = civicrm_api('EntityTag', 'create', $params);
     print "params from scheme \n";
-    print_r($params);
+    // print_r($params);
     return $result;
   }elseif($type == 'tag_remove') {
     $result = civicrm_api('EntityTag', 'delete', $params);
     return $result;
-  }
-  else {
+  }elseif($type == 'relationship') {
+    // We accept keyed sets of parameters for relationships
+    // in case we want to create numerous different relationships
+    // on the same contact.
+    foreach($params as $key => $value) {
+      $ck_params = array(
+        'version' => 3,
+        'sequential' => 1,
+        'contact_id_a' => $value['contact_id_a'],
+        'contact_id_b' => $value['contact_id_b'],
+      );
+      $results = civicrm_api('Relationship', 'get', $ck_params);
+      if(isset($results['id']) && !empty($results['id'])) {
+        $result[$key] = 'complete';
+      }else{
+        $result[$key] = civicrm_api('Relationship', 'create', $value);
+      }
+    }
+    return $result;
+  }else{
     $contacts = '';
   }
   $result = civicrm_api('uf_match', 'get', array('version' => 3, 'uf_id' => 10));

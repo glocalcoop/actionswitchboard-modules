@@ -1,5 +1,25 @@
 <?php
 
+function asb_scheme_admin_settings() {
+  $form['asb_scheme_civicrm_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Additional Civicrm Settings'),
+  );
+  $form['asb_scheme_civicrm_settings']['facilitator_relationship'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Civicrm Facilitator Relationship'),
+    '#default_value' => variable_get('facilitator_relationship', ''),
+    '#description' => t('The civicrm relationship_id for facilitator relationship.'),
+  );
+  $form['asb_scheme_civicrm_settings']['schemeleader_relationship'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Civicrm Scheme Leader Relationship'),
+    '#default_value' => variable_get('schemeleader_relationship', ''),
+    '#description' => t('The civicrm relationship_id for Scheme Leader relationship.'),
+  );
+
+  return system_settings_form($form);
+}
 
 /**
  * Approve a single membership from group.
@@ -135,7 +155,7 @@ function asb_scheme_delete_membership_submit($form, &$form_state) {
  * Provide an overview of the administrator menu items.
  *
  * This function taken from og_ui.admin.inc
- * 
+ *
  * @param $entity_type
  *   The entity type.
  * @param $etid
@@ -167,4 +187,3 @@ function asb_scheme_group_admin_overview($entity_type, $etid) {
   $preview = $view->preview();
   return $preview;
 }
-
