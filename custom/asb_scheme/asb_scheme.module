@@ -1324,8 +1324,8 @@ function asb_scheme_create_civi_scheme_action($node, $context) {
     /*     'contact_id_b' => 594886, */
     /*   ),
     /*   'other_relationship_type' => array ETC. */
-    $fac_rel = variable_get('facilitator_relationshi');
-    $sl_rel = variable_get('schemeleader_relationshi');
+    $fac_rel = variable_get('facilitator_relationship');
+    $sl_rel = variable_get('schemeleader_relationship');
     if(!empty($fac_rel) && !empty($sl_rel)) {
       $params = array(
         'facilitator' => array(
