@@ -85,7 +85,12 @@ function asb_scheme_preprocess_node(&$vars) {
   }
 }
 
-
+/**
+ * Implements hook_menu_local_tasks_alter()
+ *
+ * Here we modify tabs to handle special cases
+ * like the Updates tab.
+ */
 function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   global $user;
   $check = array_intersect(array('facilitator', 'administrator'), array_values($user->roles));
@@ -93,6 +98,16 @@ function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 
   if(arg(0) == 'node' && is_numeric(arg(1))) {
     $node = node_load(arg(1));
+    if($node->type == 'scheme') {
+      foreach($data['tabs'][0]['output'] as $key => $value) {
+        /* dsm($key); */
+        /* dsm($value); */
+        if($value['#link']['path'] == 'node/%/members') {
+          // && isset($user['roles'][0])) {
+          // unset($data['tabs'][0]['output'][$key]);
+        }
+      }
+    }
     if($node->type == 'scheme'
       && $node->workflow_state_name != 'Needs Review') {
   /* if(isset($router_item['page_arguments'][0]->type) */
@@ -224,6 +239,16 @@ function asb_scheme_menu() {
     'access arguments' => array('manage members', 1, 2),
     'file' => 'asb_scheme.admin.inc',
   );
+  $items['node/%node/members'] = array(
+    'title' => 'Members',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'asb_scheme_display_members',
+    'page arguments' => array(1),
+    'access callback' => TRUE,
+    'access arguments' => array('access content'),
+    'file' => 'asb_scheme.pages.inc',
+  );
+
   return $items;
 }
 
@@ -235,6 +260,11 @@ function asb_scheme_menu() {
  * membership management.
  */
 function asb_scheme_menu_alter(&$items) {
+  // $path = 'node/%node/members';
+  /* dsm($items[$path]['access arguments']); */
+  /* dsm($items[$path]['access callback']); */
+  // $items[$path]['access arguments'][] = $items[$path]['access callback'];
+  /* $items[$path]['access callback'] = 'asb_scheme_menu_access'; */
   // Membership management tab
   $items['node/%/group'] = array(
     'title' => "Edit Members",

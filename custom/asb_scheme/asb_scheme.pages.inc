@@ -61,3 +61,20 @@ function asb_scheme_display_view($js = NULL, $view_name, $display_name, $gid) {
     return $output;
   }
 }
+
+/**
+ * Add view to node/%node/members tab
+ */
+function asb_scheme_display_members($nid) {
+  $view_name = 'scheme_members_tab';
+  $display_name = 'block_2';
+  $view = views_get_view($view_name);
+  $view->set_display($display_name);
+  if(!isset($view->dom_id)) {
+    $view->dom_id = md5($view_name . REQUEST_TIME . rand());
+  }
+  $view->execute();
+  $view->current_display = 'block_2';
+  $output = $view->render();
+  return $output;
+}
