@@ -28,3 +28,8 @@ Flag Abuse:
 https://drupal.org/comment/8582013#comment-8582013
 Added whitelisting to the views and flags available.
 This should be fixed in the full release of the module.
+
+Logintobbogan:
+https://www.drupal.org/files/logintoboggan-minpasswordlength-1142808-9.patch
+Fixes the incorrect number of charachters displayed on 
+password help text.
