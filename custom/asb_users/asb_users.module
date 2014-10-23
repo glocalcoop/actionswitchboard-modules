@@ -1,0 +1,47 @@
+<?php
+/**
+ * This module handles user registration and
+ * other user specific functions.
+ */
+
+/**
+ *
+ * Implements hook_form_alter()
+ * 
+ * Specifically this adds a new validation hook
+ * and javascript markup to handle re-populating
+ * fields after a failed user registration attempt.
+ */
+function asb_users_form_alter(&$form, &$form_state, $form_id) {
+  if($form_id == 'user_register_form') {
+    // Add a validation hook and make it execute first
+    array_unshift($form['#validate'], '_asb_users_validate');
+    // Make form state available to javascript
+    drupal_add_js(array('asb_users' => array('url_query' => $form_state['input'])), array('type' => 'setting'));
+    $form['#attached']['js'] = array(
+      drupal_get_path('module', 'asb_users') . '/asb_users.js',
+    );
+  }
+}
+
+/**
+ * Custom validation callback for user_register_form
+ */
+function _asb_users_validate($form, &$form_state) {
+  if(!isset($form_state['temp'])) {
+    // We must save civi's custom_23 because form validation
+    // wipes it out if validation failes.
+    // FIXME: Users cannot modify their selection of skills
+    // on re-submission, which shouldn't be the case.  Need
+    // to figure out how to capture new checks on re-submission.
+    $form_state['temp'] = $form_state['input']['custom_23'];
+  }else{
+    $form_state['input']['custom_23'] = $form_state['temp'];
+  }
+  // Make $form_state available to javascript.
+  drupal_add_js(array('asb_users' => array('url_query' => $form_state['input'])), array('type' => 'setting'));
+  $form['#attached']['js'] = array(
+    drupal_get_path('module', 'asb_users') . '/asb_users.js',
+  );
+}
+

@@ -1,0 +1,4 @@
+name = ASB Custom User Functions
+description = "Any custom functions used for users."
+core = 7.x
+package = Action Switchboard
