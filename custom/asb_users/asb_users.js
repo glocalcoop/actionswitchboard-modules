@@ -22,6 +22,8 @@
       // Deal with custom_108 (Host participants) on live
       if(form_items['custom_108'] == 'host-yes') {
         $('select[name="custom_108"]').val('host-yes');
+      }else{
+        $('select[name="custom_108"]').val('host-no');
       }
       // Treat custom_72 individually as a select list.
       $('select#custom_72 option[value="' + form_items['custom_72'] + '"]').attr('selected','selected');
