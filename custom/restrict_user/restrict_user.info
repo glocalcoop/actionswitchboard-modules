@@ -1,0 +1,4 @@
+name = Restrict User
+description = Adds restrictions on certain domain registrations.
+core = 7.x
+

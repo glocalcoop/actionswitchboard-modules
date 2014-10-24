@@ -1,0 +1,12 @@
+<?php
+
+function restrict_user_form_user_register_form_alter(&$form, &$form_state, $form_id) {
+  $form['#validate'][] = 'restrict_user_form_validate';
+}
+
+function restrict_user_form_validate(&$form, &$form_state) {
+  $pos = strpos($form_state['input']['mail'], 'itregi.com');
+  if($pos !== false) {
+    form_set_error('email', "Sorry, we don't want you here!  Please go somewhere else.");
+  }
+}
