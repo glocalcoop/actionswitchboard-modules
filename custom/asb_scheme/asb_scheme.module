@@ -1177,6 +1177,9 @@ function asb_scheme_val_to_dec($num) {
  */
 function asb_scheme_funds_raised($node = NULL) {
   if($node != NULL) {
+    // Check for facilitator assignment.  If it does not
+    // exist, then don't use civicrm to show funds needed.
+    // Instead use the node->field_funding_needs.
     if(!isset($node->field_facilitator['und'][0])) {
       $raised = $node->field_funding_needs['und'][0]['value'];
       return $raised;
