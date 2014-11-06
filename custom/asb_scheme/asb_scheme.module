@@ -1177,6 +1177,10 @@ function asb_scheme_val_to_dec($num) {
  */
 function asb_scheme_funds_raised($node = NULL) {
   if($node != NULL) {
+    if(!isset($node->field_facilitator['und'][0])) {
+      $raised = $node->field_funding_needs['und'][0]['value'];
+      return $raised;
+    }
     if(isset($node->field_donation_link['und'][0]['value'])) {
       $link = explode('&',$node->field_donation_link['und'][0]['value']);
       if(isset($link[1])) {
