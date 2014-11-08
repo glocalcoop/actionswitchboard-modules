@@ -74,9 +74,9 @@ function asb_scheme_field_formatter_view($entity_type, $entity, $field, $instanc
       foreach($items as $id => $item) {
         // Get parent entity if it exists
         $parents = array_keys(taxonomy_get_parents($item['tid']));
-        $parent_entity = entity_load('taxonomy_term', array($parents[0]));
         // Make sure we only try to create parents if they exist
-        if(!empty($parent_entity)) {
+        if(!empty($parents)) {
+          $parent_entity = entity_load('taxonomy_term', array($parents[0]));
           $uri = entity_uri('taxonomy_term', $parent_entity[10]);
           $parent = array(
             '#type' => 'link',
