@@ -50,6 +50,96 @@ function asb_scheme_entity_info_alter(&$entity_info) {
 }
 
 /**
+ * Implements hook_formatter_info().
+ */
+function asb_scheme_field_formatter_info() {
+  return array(
+    'asb_scheme_location_link' => array(
+      'label' => t('Asb Scheme Location Link'),
+      'field types' => array('taxonomy_term_reference'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function asb_scheme_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  // Extract required field information.
+  $vocabulary = taxonomy_vocabulary_machine_name_load($field['settings']['allowed_values'][0]['vocabulary']);
+  $elements = array();
+  switch ($display['type']) {
+    // Create the correct term entities for theming
+    case 'asb_scheme_location_link':
+      foreach($items as $id => $item) {
+        // Get parent entity if it exists
+        $parents = array_keys(taxonomy_get_parents($item['tid']));
+        $parent_entity = entity_load('taxonomy_term', array($parents[0]));
+        // Make sure we only try to create parents if they exist
+        if(!empty($parent_entity)) {
+          $uri = entity_uri('taxonomy_term', $parent_entity[10]);
+          $parent = array(
+            '#type' => 'link',
+            '#title' => $parent_entity[10]->name,
+            '#href' => $uri['path'],
+            '#options' => $uri['options'],
+          );
+        }else{
+          // Otherwise return null
+          $parent = NULL;
+        }
+        $term = entity_load('taxonomy_term', array($items[0]['tid']));
+        $term_id = array_keys($term);
+        $uri = entity_uri('taxonomy_term', $term[$term_id[0]]);
+        $element = array(
+          '#type' => 'link',
+          '#title' => $term[$term_id[0]]->name,
+          '#href' => $uri['path'],
+          '#options' => $uri['options'],
+        );
+        if($parent != NULL) {
+          $elements[$item['tid']] = array(
+            '#markup' => theme('asb_scheme_formatter_location', array('element' => $element, 'parent' => $parent)),
+          );
+        }else{
+          $elements[$item['tid']] = array(
+            '#markup' => theme('asb_scheme_formatter_location', array('parent' => $element,)),
+          );
+        }
+      }
+      break;
+  }
+  return $elements;
+}
+
+/**
+ * Format location term reference for scheme teasers.
+ */
+function theme_asb_scheme_formatter_location($variables) {
+  $output = '';
+  $items = array();
+  $separator = ' > ';
+  // Sort variables so parent comes before element
+  krsort($variables);
+  foreach($variables as $level => $item) {
+    // Build the markup for the links.
+    if($level == 'element' && $item != NULL) {
+      $line  = '<span class="lineage-item lineage-item-level-' .$level .'">';
+      $line .= drupal_render($item);
+      $line .= '</span>';
+      $items[] = $line;
+    }elseif($level == 'parent' && $item != NULL) {
+      $line  = '<span class="lineage-item lineage-item-level-' .$level .'">';
+      $line .= drupal_render($item);
+      $line .= '</span>';
+      $items[] = $line;
+    }
+  }
+  $output .= implode($separator, $items);
+  return $output;
+}
+
+/**
 * Implements hook_preprocess_node().
 */
 function asb_scheme_preprocess_node(&$vars) {
@@ -100,9 +190,10 @@ function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
     $node = node_load(arg(1));
     if($node->type == 'scheme') {
       foreach($data['tabs'][0]['output'] as $key => $value) {
-        /* dsm($key); */
-        /* dsm($value); */
         if($value['#link']['path'] == 'node/%/members') {
+          // TODO: Figure out why this is here, because it doesn't
+          // seem to be doing anything at all.
+
           // && isset($user['roles'][0])) {
           // unset($data['tabs'][0]['output'][$key]);
         }
@@ -157,15 +248,12 @@ function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 }
 
 function asb_scheme_theme_registry_alter(&$theme_registry) {
-  // dsm($theme_registry);
   if (isset($theme_registry['menu_local_task'])) {
     $theme_registry['menu_local_task']['function'] = 'theme_asb_scheme_local_task'; // The new theme function.
   }
 }
 
 function theme_asb_scheme_local_task(&$variables) {
-  // dsm($variables);
-  // dsm("Hi dad");
 
   $link = $variables['element']['#link'];
   $link_text = $link['title'];
@@ -261,8 +349,6 @@ function asb_scheme_menu() {
  */
 function asb_scheme_menu_alter(&$items) {
   // $path = 'node/%node/members';
-  /* dsm($items[$path]['access arguments']); */
-  /* dsm($items[$path]['access callback']); */
   // $items[$path]['access arguments'][] = $items[$path]['access callback'];
   /* $items[$path]['access callback'] = 'asb_scheme_menu_access'; */
   // Membership management tab
@@ -493,7 +579,6 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
   // Make modifications to scheme_overview_filtered view
   // Set label as display value for all selections.
   if(isset($form_state['view']->filter['status']->view->name) && $form_state['view']->filter['status']->view->name == 'scheme_overview_filtered') {
-    // dsm($form);
     if($form_id == 'views_exposed_form') {
       if(isset($form['created'])) {
         $form['created']['#theme'] = 'select_as_links';
@@ -528,7 +613,6 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
 
     $issues = asb_scheme_get_issues();
     $issue_list = array();
-    // dsm($form_state['view']->filter['field_issues_goals_target_id']);
     foreach($issues as $key => $issue) {
       $issue_list[] = array(
         'title' => t($issue->title),
@@ -542,9 +626,7 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
       $form['field_issues_goals_target_id']['#options'][] = t($issue->title);
     }
     // unset($form_state['view']->display_handler->handlers['filter']['field_issues_goals_target_id']->options['group_info']['group_items']);
-    // dsm($issue_list);
     foreach($issue_list as $key => $issue) {
-      // dsm($issue);
       $form_state['view']->display_handler->handlers['filter']['field_issues_goals_target_id']->options['group_info']['group_items'][] = $issue;
     }
   }
@@ -556,8 +638,6 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
     }
     unset($form_state['view']->display_handler->handlers['filter']['field_material_needs_value']->options['group_info']['group_items']);
     $form_state['view']->display_handler->handlers['filter']['field_material_needs_value']->options['group_info']['group_items'] = $mneeds;
-    // dsm($form_state['view']);
-    // dsm($form_state['view']->display_handler->handlers['filter']['field_material_needs_value']->options['group_info']['group_items']);
   }
   $pos = strpos($form['#action'], 'mfe-single-modal-callback');
   // Modify field modal edit form
@@ -750,6 +830,9 @@ function asb_scheme_theme() {
       'render_eleement' => 'element',
       'template' => 'asb-scheme-user-message',
     ),
+    'asb_scheme_formatter_location' => array(
+      'variables' => array('element' => NULL),
+    ),
   );
 }
 
@@ -841,7 +924,6 @@ function asb_scheme_context_plugins() {
       'parent' => 'context_condition',
     ),
   );
-  // dsm($plugins);
   return $plugins;
 }
 
@@ -857,7 +939,6 @@ function asb_scheme_context_registry() {
       ),
     ),
   );
-  // dsm($plugin);
   return $plugin;
 }
 
@@ -923,7 +1004,6 @@ function asb_scheme_node_view($node, $view_mode, $langcode){
       }
       // Create issues/goals markup
       if (isset($node->field_issues_goals['und'])) {
-        // dsm($node);
         $issues_goals = asb_scheme_format_issues_goals($node);
         /* Add markup for issues */
         $node->content['issues'] = array(
@@ -1473,7 +1553,6 @@ function asb_scheme_remind_facilitator_action(&$entity, $context) {
           WHERE stamp < (UNIX_TIMESTAMP() - 604800)
           AND sid = 2";
     $result = db_query($sql);
-    //dsm($result);
     $facs = array();
     foreach($result as $row) {
       $scheme = '<a href="' .$base_url .'/node/' .$row->nid .'">' .$row->title .'</a>';
@@ -1809,8 +1888,6 @@ function asb_scheme_get_civi_skills($skills_info, $civi_skills) {
     $skills_values[$value['value']] = $value['label'];
   }
   $diff = array_merge($skills_info['settings']['allowed_values'], $skills_values);
-  // dsm($skills_info['settings']['allowed_values']);
-  // dsm($diff);
   return $diff;
 }
 
@@ -1842,11 +1919,8 @@ function asb_scheme_get_user_name($uid) {
 }
 
 function asb_scheme_date_combo_process_alter(&$element, &$form_state, $context) {
-  /* dsm($form_state); */
-  /* dsm($context); */
+  // TODO: Document this function
   $element['value2']['#title'] = 'Finish';
-  /* dsm($element); */
-
 }
 
 function asb_scheme_civicrm_post( $op, $objectName, $objectId, &$objectRef ) {
