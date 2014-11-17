@@ -277,15 +277,19 @@ function asb_issues_get_all_goals($vid, $tids = array()) {
     $new_terms[$term->tid] = $term;
   }while ($term = next($tree));
   // print_r($current_page);
-
   $terms = array();
   // Build the actual form.
   $parsed_terms = array();
   foreach($tids as $k => $value) {
-    $parsed_terms[$value] = $new_terms[$value];
+    if(!isset($parsed_terms[$value])) {
+      $parsed_terms[$value] = $new_terms[$value];
+    }
     $newtree = taxonomy_get_tree(5, $value, NULL);
     foreach($newtree as $ka => $va) {
-      $parsed_terms[$va->tid] = $new_terms[$va->tid];
+      // $parsed_terms[$va->tid] = $new_terms[$va->tid];
+      if(!isset($parsed_terms[$va->tid])) {
+        $parsed_terms[$va->tid] = $va;
+      }
     }
   }
   $current_terms = $parsed_terms;
