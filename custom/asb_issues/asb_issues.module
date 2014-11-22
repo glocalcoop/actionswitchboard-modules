@@ -285,10 +285,16 @@ function asb_issues_get_all_goals($vid, $tids = array()) {
       $parsed_terms[$value] = $new_terms[$value];
     }
     $newtree = taxonomy_get_tree(5, $value, NULL);
+    $newtree[] = taxonomy_term_load($value);
     foreach($newtree as $ka => $va) {
       // $parsed_terms[$va->tid] = $new_terms[$va->tid];
       if(!isset($parsed_terms[$va->tid])) {
         $parsed_terms[$va->tid] = $va;
+      }else{
+        $parsed_terms[$va->tid] = $va;
+      }
+      if(isset($parsed_terms[arg(2)])) {
+        unset($parsed_terms[arg(2)]);
       }
     }
   }
@@ -314,7 +320,11 @@ function asb_issues_theme_goals($terms) {
   foreach($terms as $key => $term) {
     if($key != '#parent_fields') {
       $link = l(t($term['#term']['#title']), $term['#term']['#href'], array('attributes' => array('class' => array('goal-link'))));
-      $output .= '<li class="goal depth-' .$term['#term']['depth'] .' tid-' .$term['#term']['tid'] .'">' .$link ."</li>\n";
+      !isset($term['#term']['parent']) ? $depth = 0 : $depth = $term['#term']['depth'] + 1;
+      // $output .= '<li class="goal depth-' .$term['#term']['depth'] .' tid-' .$term['#term']['tid'] .'">' .$link ."</li>\n";
+      if(!empty($term['#term']['name'])) {
+        $output .= '<li class="goal depth-' .$depth .' tid-' .$term['#term']['tid'] .'">' .$link ."</li>\n";
+      }
     }
   }
   $output .= "</ul>\n";
