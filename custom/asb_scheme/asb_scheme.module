@@ -188,17 +188,25 @@ function asb_scheme_menu_local_tasks_alter(&$data, $router_item, $root_path) {
 
   if(arg(0) == 'node' && is_numeric(arg(1))) {
     $node = node_load(arg(1));
-    if($node->type == 'scheme') {
+    // If the node is not a scheme, then we remove
+    // any reference to the members tab and
+    // if the user is not authenticated we remove the view tab.
+
+    // TODO: Add logic so that if the view tab is the only one
+    // that is displayed it get's hidden by default.
+    
+    if($node->type != 'scheme') {
       foreach($data['tabs'][0]['output'] as $key => $value) {
         if($value['#link']['path'] == 'node/%/members') {
-          // TODO: Figure out why this is here, because it doesn't
-          // seem to be doing anything at all.
-
-          // && isset($user['roles'][0])) {
-          // unset($data['tabs'][0]['output'][$key]);
+            unset($data['tabs'][0]['output'][$key]);
+            $check = array_intersect(array('preauthorized', 'anonymous user'), array_values($user->roles));
+            if(empty($check) ? FALSE : TRUE) {
+                unset($data['tabs'][0]['output'][0]);
+            }
         }
       }
     }
+
     if($node->type == 'scheme'
       && $node->workflow_state_name != 'Needs Review') {
   /* if(isset($router_item['page_arguments'][0]->type) */

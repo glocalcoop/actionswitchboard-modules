@@ -6,8 +6,9 @@ function restrict_user_form_user_register_form_alter(&$form, &$form_state, $form
 
 function restrict_user_form_validate(&$form, &$form_state) {
   $pos = strpos($form_state['input']['mail'], 'itregi.com');
-  $oos2 = strpos($form_state['input']['mail'], 'drupaler.org'); 
-  if($pos !== false || $pos2 !== false) {
+  $pos2 = strpos($form_state['input']['mail'], 'drupaler.org');
+  $drupalerpos = strpos($form_state['input']['mail'], 'drupaler.org');
+  if(!empty($pos) || !empty($pos2)) {
     form_set_error('email', "Sorry, we don't want you here!  Please go somewhere else.");
   }
 }
