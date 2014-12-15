@@ -951,6 +951,14 @@ function asb_scheme_context_registry() {
 }
 
 /**
+ * Implements hook_node_presave()
+ * Used to clean up htmlcharacters in node title.
+ */
+function asb_scheme_node_presave($node) {
+  $node->title = htmlspecialchars_decode($node->title, ENT_QUOTES);
+}
+
+/**
  * Creates the scheme create content links.
  */
 function asb_scheme_node_links() {
