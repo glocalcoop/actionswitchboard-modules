@@ -559,6 +559,9 @@ function asb_scheme_form_alter(&$form, &$form_state, $form_id) {
   }
   if($form_id == 'user_login') {
     $form['html_markup'] = array('#markup' => t('<div class="reset-pass"><a class="reset-pass-link" href="/user/password">Forgot your password?</a></div><!-- Added in asb_scheme.module -->'));
+    if($form['#action'] == '/modal_forms/ajax/login') {
+      $form['name']['#prefix'] = '<div class="register-notice">Don\'t have an account? <a class="register-here" href="/user/register">Register here.</a></div>';
+    }
   }
   // This removes all "Scheme Creation:" workflow designations
   // from views exposed forms.
