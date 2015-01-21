@@ -552,8 +552,6 @@ function asb_issues_add_civi_issue_tags($contact, $user_interests) {
     // just in case we trim whitespace
     $value = trim($value);
     $params['tag_id'] = $issue_tags[$value];
-    print "params from issuse \n";
-    // print_r($params);
     $result = asb_scheme_civicrm_api('tag_add', 0, NULL, $params);
     // print_r($result);
     if($result['is_error'] == 1) {

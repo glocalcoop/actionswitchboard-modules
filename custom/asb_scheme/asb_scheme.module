@@ -1904,6 +1904,11 @@ function asb_scheme_get_civi_skills($skills_info, $civi_skills) {
     $skills_values[$value['value']] = $value['label'];
   }
   $diff = array_merge($skills_info['settings']['allowed_values'], $skills_values);
+  foreach($diff as $k => $v) {
+    if($v == '') {
+      unset($diff[$k]);
+    }
+  }
   return $diff;
 }
 
