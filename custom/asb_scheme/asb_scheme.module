@@ -1754,6 +1754,7 @@ function asb_scheme_civicrm_api($type = 'contact', $ufid = 0, $info = NULL, $par
 				 'version' => 3,
 				 'sequential' => 1,
 				 'option_group_id' => 90,
+                 'is_active' => 1,
 				 'value' => $value,
 				 );
 	  $option = civicrm_api3('OptionValue', 'get', $option_params);
