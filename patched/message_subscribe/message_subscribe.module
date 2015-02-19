@@ -113,7 +113,6 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
       // Add the user ID for the queue.
       'uid' => $subscribe_options['last uid'],
     );
-
     // Exit now, as messages will be processed via queue API.
     return $queue->createItem($task);
   }
@@ -127,12 +126,10 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
     // However we need to adhere to the range.
     $uids = $subscribe_options['range'] ? array_slice($subscribe_options['uids'], 0, $subscribe_options['range'], TRUE) : $subscribe_options['uids'];
   }
-
   if (empty($uids) && !$uids = message_subscribe_get_subscribers($entity_type, $entity, $message, $subscribe_options, $context)) {
     // If we use a queue, it will be deleted.
     return $message;
   }
-
   foreach ($uids as $uid => $values) {
     $last_uid = $uid;
     // Clone the message in case it will need to be saved, it won't
@@ -216,7 +213,6 @@ function message_subscribe_send_message($entity_type, $entity, Message $message,
 function message_subscribe_get_subscribers($entity_type, $entity, Message $message, $subscribe_options = array(), &$context = array()) {
   $context = $context ? $context : message_subscribe_get_basic_context($entity_type, $entity, $subscribe_options, $context);
   $notify_own_actions = isset($subscribe_options['notify_own_actions']) ? $subscribe_options['notify_own_actions'] : variable_get('message_subscribe_notify_own_actions', FALSE);
-
   $uids = array();
   // We don't use module_invoke_all() is we want to retain the array keys,
   // which are the user IDs.
@@ -232,17 +228,34 @@ function message_subscribe_get_subscribers($entity_type, $entity, Message $messa
       if (!empty($subscribe_options['entity access'])) {
         $account = user_load($uid);
         if (!isset($entity->og_group_ref) || $entity->group_content_access['und'][0]['value'] != 1) {
-          if (!entity_access('view', $entity_type, $entity, $account)) {
-            // User doesn't have access to view the entity.
-            continue;
+          // Here we check that the created node shares group
+          // ids with the user.  We do this so that we can send private
+          // updates to scheme members without sending those updates to
+          // everyone.  See below for information about failed entity_access
+          // checks
+
+          // Load the entity group for our created node.
+          $entity_group = og_get_entity_groups('node', $entity);
+          // Load users groups
+          $users_groups = og_get_entity_groups('user', $account);
+          foreach($entity_group['node'] as $key => $nid) {
+            if(!in_array($nid, $users_groups['node'])) {
+              continue;
+            }
           }
+
+          // entity_access is failing here, I think because node_insert
+          // has yet to complete node creation with og permissions
+          /* if (!entity_access('view', $entity_type, $entity, $account)) { */
+          /*   // User doesn't have access to view the entity. */
+          /*   continue; */
+          /* } */
         }
       }
 
       $uids[$uid] = $values;
     }
   }
-
   $values = array(
     'context' => $context,
     'entity_type' => $entity_type,
