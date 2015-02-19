@@ -7,9 +7,10 @@ global $user;
 ?>
 <nav id="asb-scheme-user-message" class="<?php print $classes; ?>"<?php print $attributes; ?>>
   <?php if($logged_in): ?>
-	<div class="title">Hello,</div>
-	<div class="username"><a href="/user"><?php print $user->name;?></a></div>
-
+    <div>
+	     <div class="title">Hello,</div>
+	     <div class="username"><a href="/user"><?php print $user->name;?></a></div>
+    </div>
 	<div class="userdashboard"><a href="/dashboard/"><span class="icon tools dashboard-link"></span>Dashboard</a>
     <?php if($messages != "0" ): ?>
       <span class="counter badge"><a href="/dashboard/"><?php print $messages; ?></a></span>
@@ -30,5 +31,5 @@ global $user;
       <a class="register-link" href="/user/register">Register</a>
     </div>
   <?php endif;?>
- 
+
 </nav>
