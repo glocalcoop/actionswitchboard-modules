@@ -404,6 +404,9 @@ function asb_scheme_form_comment_form_alter(&$form, &$form_state) {
 }
 
 function asb_scheme_privatemsg_message_presave_alter(&$message) {
+  // Set user permissions for pre-authorized users ability
+  // to send privatemsgs.
+  user_role_grant_permissions(9, array('read privatemsg'));
   // We turn the gid saved in the asb_pm_og_submit function
   // into a fielded entity reference.
   if(isset($message->gid)) {

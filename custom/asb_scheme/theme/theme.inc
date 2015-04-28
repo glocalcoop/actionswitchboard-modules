@@ -63,7 +63,9 @@ function asb_scheme_preprocess_asb_scheme_group_info(&$variables) {
       $variables['managers'][$i] .= '<div class="scheme-leader-name">';
       $variables['managers'][$i] .= theme('username', array('account' => $account));
       $variables['managers'][$i] .= '</div>';
-      // $contact = 'messages/new/' .$manager_id;
+      // Set preauthorized users permissions so they can
+      // write a private message.
+      user_role_grant_permissions(9, array('write privatemsg'));
       $contact = privatemsg_get_link(user_load($manager_id));
       $variables['managers'][$i] .= '<div class="scheme-leader-contact">';
       if($user->uid != 0) {
