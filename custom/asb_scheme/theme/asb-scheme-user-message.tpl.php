@@ -22,10 +22,14 @@ global $user;
   <?php endif; ?>
 
   <?php if(!$logged_in): ?>
-    <div class="login login-normal"><a class="login-link ctools-use-modal" style="display:inherit" href="/user">Login</a></div>
-    <div class="login login-modal" style="display:none;">
-      <a class="login-link ctools-use-modal ctools-modal-modal-popup-small" style="display:inherit" href="/modal_forms/nojs/login">Login</a>
-    </div>
+    <?php if(arg(1) != 'register'): ?>
+      <div class="login login-normal"><a class="login-link ctools-use-modal" style="display:inherit" href="/user">Login</a></div>
+      <div class="login login-modal" style="display:none;">
+        <a class="login-link ctools-use-modal ctools-modal-modal-popup-small" style="display:inherit" href="/modal_forms/nojs/login">Login</a>
+      </div>
+    <?php else: ?>
+      <div class="login"><a class="login-link" style="display:inherit" href="/user">Login</a></div>
+    <?php endif; ?>
     or
     <div class="register">
       <a class="register-link" href="/user/register">Register</a>
